@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
-import 'screens/welcome_screen.dart'; 
+import 'screens/onboarding/welcome_screen.dart'; 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'screens/main_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); 
+  
+  await dotenv.load(fileName: ".env");
+
   runApp(const KolokApp());
 }
 
@@ -14,12 +21,13 @@ class KolokApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Kolok',
       theme: ThemeData(
-        fontFamily: 'Gilroy', 
-        primaryColor: const Color(0xFF2E3192),
-        textTheme: const TextTheme(
-          displayLarge: TextStyle(fontWeight: FontWeight.w800), 
-          bodyLarge: TextStyle(fontWeight: FontWeight.w400),    
+        textTheme: GoogleFonts.poppinsTextTheme(
+          const TextTheme(
+            displayLarge: TextStyle(fontWeight: FontWeight.w800), 
+            bodyLarge: TextStyle(fontWeight: FontWeight.w400),    
+          ),
         ),
+        primaryColor: const Color(0xFF2E3192),
       ),
       home: const WelcomeScreen(),
     );

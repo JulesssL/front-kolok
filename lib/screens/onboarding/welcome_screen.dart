@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/main_button_onboarding.dart';
+import '../../widgets/main_button_onboarding.dart';
 import 'sign_up_screen.dart'; 
 
 class WelcomeScreen extends StatelessWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kolok/screens/address_screen.dart';
+import 'package:kolok/screens/onboarding/address_screen.dart';
 
 class HomeChoiceScreen extends StatelessWidget {
   const HomeChoiceScreen({super.key});
