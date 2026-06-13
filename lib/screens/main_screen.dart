@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'home/home_screen.dart';
 import 'tasks/tasks_screen.dart';
+import 'budget/budget_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -17,7 +18,7 @@ class _MainScreenState extends State<MainScreen> {
     const HomeScreen(),
     const TasksScreen(),
     const Center(child: Text("Messages")),
-    const Center(child: Text("Budget")),
+    const BudgetScreen(),
     const Center(child: Text("Courses")),
   ];
 
