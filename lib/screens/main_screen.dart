@@ -4,6 +4,7 @@ import 'home/home_screen.dart';
 import 'tasks/tasks_screen.dart';
 import 'budget/budget_screen.dart';
 import 'shopping/shopping_screen.dart';
+import 'messages/messages_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -18,7 +19,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = [
     const HomeScreen(),
     const TasksScreen(),
-    const Center(child: Text("Messages")),
+    const MessagesScreen(),
     const BudgetScreen(),
     const ShoppingScreen(),
   ];
