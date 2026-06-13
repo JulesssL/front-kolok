@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../widgets/main_button_onboarding.dart';
-import '../../services/auth_service.dart';
+import '../../providers/auth_provider.dart';
 import 'home_choice_screen.dart'; 
 
 class ProfileSetupScreen extends StatefulWidget {
@@ -19,7 +20,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _nomController = TextEditingController();
   
   bool _isLoading = false;
-  final AuthService _authService = AuthService();
 
   @override
   void dispose() {
@@ -38,15 +38,15 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     try {
       String fullName = "${_prenomController.text.trim()} ${_nomController.text.trim()}";
 
-      await _authService.register(
-        name: fullName,
-        email: widget.email,
-        password: widget.password,
+      await context.read<AuthProvider>().register(
+        fullName,
+        widget.email,
+        widget.password,
       );
 
-      await _authService.login(
-        email: widget.email,
-        password: widget.password,
+      await context.read<AuthProvider>().login(
+        widget.email,
+        widget.password,
       );
 
       if (mounted) {

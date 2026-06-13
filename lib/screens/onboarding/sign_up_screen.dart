@@ -14,15 +14,17 @@ class _SignupScreenState extends State<SignupScreen> {
   
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       Navigator.push(
         context,
@@ -79,6 +81,27 @@ class _SignupScreenState extends State<SignupScreen> {
                     validator: (value) {
                       if (value == null || value.length < 8) {
                         return 'Le mot de passe doit faire au moins 8 caractères';
+                      }
+                      if (!RegExp(r'(?=.*[A-Z])').hasMatch(value)) {
+                        return 'Le mot de passe doit contenir une majuscule';
+                      }
+                      if (!RegExp(r'(?=.*[0-9])').hasMatch(value)) {
+                        return 'Le mot de passe doit contenir un chiffre';
+                      }
+                      return null;
+                    },
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  const Text("Confirmer le mot de passe", style: TextStyle(fontWeight: FontWeight.bold)),
+                  TextFormField(
+                    controller: _confirmPasswordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(hintText: "••••••••"),
+                    validator: (value) {
+                      if (value != _passwordController.text) {
+                        return 'Les mots de passe ne correspondent pas';
                       }
                       return null;
                     },

@@ -323,7 +323,7 @@ class _TasksScreenState extends State<TasksScreen> {
               child: DropdownButtonHideUnderline(
                 child: DropdownButton<String>(
                   isExpanded: true,
-                  hint: const Text("Sélectionner un coloc"),
+                  hint: const Text("Sélectionner un kolok"),
                   items: const [],
                   onChanged: (val) {},
                 ),

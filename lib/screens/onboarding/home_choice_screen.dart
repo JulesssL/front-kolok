@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kolok/screens/onboarding/address_screen.dart';
+import 'join_kolok_screen.dart';
 
 class HomeChoiceScreen extends StatelessWidget {
   const HomeChoiceScreen({super.key});
@@ -42,6 +43,12 @@ class HomeChoiceScreen extends StatelessWidget {
               title: "Rejoindre une colocation existante",
               subtitle: "Entrez le code d'invitation",
               onTap: () {
+                 Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const JoinKolokScreen(),
+                  ),
+                );
               },
             ),
           ],

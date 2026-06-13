@@ -85,7 +85,7 @@ class _AddressScreenState extends State<AddressScreen> {
                   const Text("Ces informations nous aideront à personnaliser votre expérience", style: TextStyle(color: Colors.grey, fontSize: 14)),
                   const SizedBox(height: 30),
 
-                  _buildLabelField("Nom de la Koloc *", "Ex: L'Appart des Potes", _nameController, isRequired: true),
+                  _buildLabelField("Nom de la Kolok *", "Ex: L'Appart des Potes", _nameController, isRequired: true),
                   const SizedBox(height: 20),
                   _buildLabelField("Adresse postale *", "12 rue des Lilas", _addressController, isRequired: true),
                   const SizedBox(height: 20),

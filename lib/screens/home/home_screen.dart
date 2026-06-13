@@ -86,7 +86,7 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "Statut de la Koloc",
+                "Statut de la Kolok",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               Icon(Icons.home_outlined, color: Colors.grey.shade400),

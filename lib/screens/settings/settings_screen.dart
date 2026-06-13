@@ -81,7 +81,7 @@ class SettingsScreen extends StatelessWidget {
                         child: const Icon(Icons.description_outlined, color: Color(0xFF2E3192), size: 20),
                       ),
                       const SizedBox(width: 12),
-                      const Text("Charte de la Coloc", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const Text("Charte de la Kolok", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     ],
                   ),
                   const SizedBox(height: 16),

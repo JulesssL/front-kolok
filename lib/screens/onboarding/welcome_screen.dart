@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../widgets/main_button_onboarding.dart';
 import 'sign_up_screen.dart'; 
+import 'log_in_screen.dart'; 
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -36,7 +37,7 @@ class WelcomeScreen extends StatelessWidget {
             const Spacer(),
 
             MainButton(
-              text: "COMMENCER",
+              text: "S'INSCRIRE",
               color: Colors.white,
               textColor: const Color(0xFF2E3192),
               onPressed: () {
@@ -45,6 +46,23 @@ class WelcomeScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => const SignupScreen()),
                 );
               },
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LogInScreen()),
+                );
+              },
+              child: const Text(
+                "J'ai déjà un compte",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
             ),
           ],
         ),

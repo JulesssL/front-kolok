@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../widgets/main_button_onboarding.dart';
+import '../main_screen.dart';
 
 class InviteScreen extends StatelessWidget {
   final String joinCode;
@@ -87,7 +88,7 @@ class InviteScreen extends StatelessWidget {
             const SizedBox(height: 40),
 
             const Text(
-              "Déjà dans la Koloc :",
+              "Déjà dans la Kolok :",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
             ),
             const SizedBox(height: 15),
@@ -117,7 +118,13 @@ class InviteScreen extends StatelessWidget {
 
             Center(
               child: TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MainScreen()),
+                    (route) => false,
+                  );
+                },
                 child: const Text(
                   "PASSER À L'ACCUEIL",
                   style: TextStyle(

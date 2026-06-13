@@ -37,10 +37,10 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: const Color(0xFF2E3192),
           elevation: 4,
           shape: const CircleBorder(),
-          child: SvgPicture.asset(
-            "assets/icons/messages.svg",
-            width: 26,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          child: const Icon(
+            Icons.chat_bubble_outline,
+            color: Colors.white,
+            size: 28,
           ), 
         ),
       ),
