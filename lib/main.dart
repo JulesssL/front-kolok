@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'screens/onboarding/welcome_screen.dart'; 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/main_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'providers/auth_provider.dart';
+import 'providers/kolok_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); 
   
   await dotenv.load(fileName: ".env");
 
-  runApp(const KolokApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()..checkAuthStatus()),
+        ChangeNotifierProvider(create: (_) => KolokProvider()),
+      ],
+      child: const KolokApp(),
+    ),
+  );
 }
 
 class KolokApp extends StatelessWidget {
