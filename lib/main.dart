@@ -40,7 +40,7 @@ class KolokApp extends StatelessWidget {
         ),
         primaryColor: const Color(0xFF2E3192),
       ),
-      home: const WelcomeScreen(),
+      home: const MainScreen(),
     );
   }
 }

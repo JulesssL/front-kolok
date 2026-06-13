@@ -51,13 +51,10 @@ class MessagesScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Row(
               children: [
-                _buildAvatar("S", const Color(0xFF2E3192)),
-                const SizedBox(width: -10),
-                _buildAvatar("M", const Color(0xFF2E3192)),
-                const SizedBox(width: -10),
-                _buildAvatar("L", const Color(0xFF2E3192)),
-                const SizedBox(width: -10),
-                _buildAvatar("E", const Color(0xFF2E3192)),
+                _buildOverlappingAvatar("S", const Color(0xFF2E3192)),
+                _buildOverlappingAvatar("M", const Color(0xFF2E3192)),
+                _buildOverlappingAvatar("L", const Color(0xFF2E3192)),
+                _buildOverlappingAvatar("E", const Color(0xFF2E3192)),
               ],
             ),
           ),
@@ -124,6 +121,13 @@ class MessagesScreen extends StatelessWidget {
         backgroundColor: color,
         child: Text(initial, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
       ),
+    );
+  }
+
+  Widget _buildOverlappingAvatar(String initial, Color color) {
+    return Align(
+      widthFactor: 0.7,
+      child: _buildAvatar(initial, color),
     );
   }
 

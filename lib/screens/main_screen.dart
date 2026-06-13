@@ -37,7 +37,11 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: const Color(0xFF2E3192),
           elevation: 4,
           shape: const CircleBorder(),
-          child: const SizedBox.shrink(), 
+          child: SvgPicture.asset(
+            "assets/icons/messages.svg",
+            width: 26,
+            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          ), 
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -52,7 +56,7 @@ class _MainScreenState extends State<MainScreen> {
             _buildNavItem("home", "Accueil", 0),
             _buildNavItem("tasks", "Tâches", 1),
 
-            _buildCenterItem("messages", "Messages", 2),
+            Expanded(child: const SizedBox.shrink()), // Center spacer
 
             _buildNavItem("budget", "Budget", 3),
             _buildNavItem("courses", "Courses", 4),
@@ -74,14 +78,21 @@ class _MainScreenState extends State<MainScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SvgPicture.asset(
-              assetPath,
-              width: 22,
-              colorFilter: ColorFilter.mode(
-                isActive ? const Color(0xFF2E3192) : Colors.grey.shade400,
-                BlendMode.srcIn,
+            if (iconName == "budget")
+              Icon(
+                Icons.account_balance_wallet,
+                color: isActive ? const Color(0xFF2E3192) : Colors.grey.shade400,
+                size: 24,
+              )
+            else
+              SvgPicture.asset(
+                assetPath,
+                width: 22,
+                colorFilter: ColorFilter.mode(
+                  isActive ? const Color(0xFF2E3192) : Colors.grey.shade400,
+                  BlendMode.srcIn,
+                ),
               ),
-            ),
             const SizedBox(height: 4),
             Text(
               label,
@@ -94,40 +105,6 @@ class _MainScreenState extends State<MainScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildCenterItem(String iconName, String label, int index) {
-    bool isActive = _currentIndex == index;
-    
-    String assetPath = "assets/icons/${iconName}.svg";
-
-    return Expanded(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 12.0), 
-            child: SvgPicture.asset(
-              assetPath,
-              width: 26,
-              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12.0),
-            child: Text(
-              label,
-              style: TextStyle(
-                color: isActive ? const Color(0xFF2E3192) : Colors.grey.shade600,
-                fontSize: 10,
-                fontFamily: 'Gilroy',
-                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
