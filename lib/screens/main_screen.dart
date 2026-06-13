@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'home/home_screen.dart';
+import 'tasks/tasks_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -14,7 +15,7 @@ class _MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = [
     const HomeScreen(),
-    const Center(child: Text("Tâches")),
+    const TasksScreen(),
     const Center(child: Text("Messages")),
     const Center(child: Text("Budget")),
     const Center(child: Text("Courses")),
