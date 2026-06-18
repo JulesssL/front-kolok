@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/shopping_provider.dart';
 import '../../providers/expense_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../settings/settings_screen.dart';
 
 class ShoppingScreen extends StatefulWidget {
@@ -75,9 +76,20 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                   MaterialPageRoute(builder: (context) => const SettingsScreen()),
                 );
               },
-              child: CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.surface,
-                child: Icon(Icons.person_outline, color: Colors.grey.shade700),
+              child: Consumer<AuthProvider>(
+                builder: (context, authProv, child) {
+                  final avatarUrl = authProv.currentUser?.avatarUrl;
+                  if (avatarUrl != null) {
+                    return CircleAvatar(
+                      backgroundImage: NetworkImage(avatarUrl),
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                    );
+                  }
+                  return CircleAvatar(
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    child: Icon(Icons.person_outline, color: Colors.grey.shade700),
+                  );
+                },
               ),
             ),
           )

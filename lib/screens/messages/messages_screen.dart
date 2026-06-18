@@ -58,9 +58,20 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   MaterialPageRoute(builder: (context) => const SettingsScreen()),
                 );
               },
-              child: CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.surface,
-                child: Icon(Icons.person_outline, color: Colors.grey.shade700),
+              child: Consumer<AuthProvider>(
+                builder: (context, authProv, child) {
+                  final avatarUrl = authProv.currentUser?.avatarUrl;
+                  if (avatarUrl != null) {
+                    return CircleAvatar(
+                      backgroundImage: NetworkImage(avatarUrl),
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                    );
+                  }
+                  return CircleAvatar(
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    child: Icon(Icons.person_outline, color: Colors.grey.shade700),
+                  );
+                },
               ),
             ),
           )

@@ -53,9 +53,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   MaterialPageRoute(builder: (context) => const SettingsScreen()),
                 );
               },
-              child: CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.surface,
-                child: Icon(Icons.person_outline, color: Colors.grey.shade700),
+              child: Consumer<AuthProvider>(
+                builder: (context, authProv, child) {
+                  final avatarUrl = authProv.currentUser?.avatarUrl;
+                  if (avatarUrl != null) {
+                    return CircleAvatar(
+                      backgroundImage: NetworkImage(avatarUrl),
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                    );
+                  }
+                  return CircleAvatar(
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    child: Icon(Icons.person_outline, color: Colors.grey.shade700),
+                  );
+                },
               ),
             ),
           )
@@ -107,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 else if (chatProv.messages.isEmpty)
                   const Text("Aucun message")
                 else
-                  ...chatProv.messages.take(3).map((m) => _buildFeedItem(m.sender?.name?[0].toUpperCase() ?? '?', m.content, "Aujourd'hui")),
+                  ...chatProv.messages.take(3).map((m) => _buildFeedItem(m.sender?.name?[0].toUpperCase() ?? '?', m.content, "Aujourd'hui", m.sender?.avatarUrl)),
                 const SizedBox(height: 80),
               ],
             ),
@@ -249,18 +260,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildFeedItem(String initial, String text, String time) {
+  Widget _buildFeedItem(String initial, String text, String time, String? avatarUrl) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: Theme.of(context).colorScheme.primary,
+            backgroundColor: avatarUrl != null ? Colors.transparent : Theme.of(context).colorScheme.primary,
+            backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
             radius: 18,
-            child: Text(
+            child: avatarUrl == null ? Text(
               initial,
               style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
+            ) : null,
           ),
           const SizedBox(width: 12),
           Expanded(

@@ -297,7 +297,8 @@ class _TasksScreenState extends State<TasksScreen> {
                 t.title, 
                 assignedName, 
                 t.dueDate != null ? "${t.dueDate!.day}/${t.dueDate!.month}" : "-", 
-                Theme.of(context).colorScheme.primary
+                Theme.of(context).colorScheme.primary,
+                t.assignedTo?.avatarUrl
               );
             }),
             const SizedBox(height: 100),
@@ -415,7 +416,7 @@ class _TasksScreenState extends State<TasksScreen> {
     );
   }
 
-  Widget _buildPlanningItem(String initial, String taskName, String personName, String day, Color avatarColor) {
+  Widget _buildPlanningItem(String initial, String taskName, String personName, String day, Color avatarColor, String? avatarUrl) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -433,9 +434,10 @@ class _TasksScreenState extends State<TasksScreen> {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: avatarColor,
+            backgroundColor: avatarUrl != null ? Colors.transparent : avatarColor,
+            backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
             radius: 18,
-            child: Text(initial, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: avatarUrl == null ? Text(initial, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)) : null,
           ),
           const SizedBox(width: 16),
           Expanded(
