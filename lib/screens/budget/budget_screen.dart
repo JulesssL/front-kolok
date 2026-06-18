@@ -110,7 +110,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
           onPressed: () => _showReimburseModal(context),
           icon: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white),
           label: const Text(
-            "SOLDER MES DETTES (45€)",
+            "SOLDER MES DETTES",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           style: ElevatedButton.styleFrom(
@@ -241,7 +241,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     children: [
                       Text("45€", style: TextStyle(color: Color(0xFF2E3192), fontSize: 24, fontWeight: FontWeight.bold)),
                       SizedBox(width: 8),
-                      Text("à Samy", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      Text("à un colocataire", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ],

@@ -1,7 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/chat_provider.dart';
+import '../../providers/auth_provider.dart';
 
-class MessagesScreen extends StatelessWidget {
+class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
+
+  @override
+  State<MessagesScreen> createState() => _MessagesScreenState();
+}
+
+class _MessagesScreenState extends State<MessagesScreen> {
+  final TextEditingController _messageController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (mounted) {
+        context.read<ChatProvider>().fetchMessages();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,15 +86,33 @@ class MessagesScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              children: [
-                _buildMessageBubble("Samy", "Salut tout le monde ! Quelqu'un pour faire les courses ce soir ?", "14:30", false, "S"),
-                _buildMessageBubble("Moi", "Je peux y aller après le boulot 👍", "14:35", true, ""),
-                _buildMessageBubble("Lucas", "Qu'est-ce qu'on mange ?", "14:40", false, "L"),
-                _buildPollWidget(),
-                const SizedBox(height: 100), // Space for input area
-              ],
+            child: Consumer2<ChatProvider, AuthProvider>(
+              builder: (context, chatProv, authProv, child) {
+                if (chatProv.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (chatProv.messages.isEmpty) {
+                  return const Center(child: Text("Aucun message"));
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  itemCount: chatProv.messages.length,
+                  itemBuilder: (context, index) {
+                    final msg = chatProv.messages[index];
+                    final isMe = msg.sender?.id == authProv.user?.id;
+                    final senderName = msg.sender?.name ?? 'Inconnu';
+                    final initial = senderName.isNotEmpty ? senderName[0].toUpperCase() : '?';
+                    
+                    return _buildMessageBubble(
+                      senderName, 
+                      msg.content, 
+                      "Aujourd'hui", // format date properly later
+                      isMe, 
+                      initial
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
@@ -88,6 +132,7 @@ class MessagesScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: TextField(
+                  controller: _messageController,
                   decoration: InputDecoration(
                     hintText: "Écrire un message...",
                     hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
@@ -101,7 +146,12 @@ class MessagesScreen extends StatelessWidget {
               backgroundColor: const Color(0xFF2E3192),
               child: IconButton(
                 icon: const Icon(Icons.send, color: Colors.white, size: 18),
-                onPressed: () {},
+                onPressed: () {
+                  if (_messageController.text.isNotEmpty) {
+                    context.read<ChatProvider>().sendMessage(_messageController.text);
+                    _messageController.clear();
+                  }
+                },
               ),
             ),
           ],

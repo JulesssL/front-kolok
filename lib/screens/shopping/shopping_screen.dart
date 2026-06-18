@@ -115,7 +115,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
           onPressed: () {},
           icon: const Icon(Icons.receipt_long_outlined, color: Colors.white),
           label: const Text(
-            "CONVERTIR EN DÉPENSE (3)",
+            "CONVERTIR EN DÉPENSE",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
           ),
           style: ElevatedButton.styleFrom(
