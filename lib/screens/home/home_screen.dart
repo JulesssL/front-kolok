@@ -4,6 +4,7 @@ import '../../providers/task_provider.dart';
 import '../../providers/expense_provider.dart';
 import '../../providers/shopping_provider.dart';
 import '../../providers/chat_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../settings/settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
