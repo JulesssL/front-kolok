@@ -98,7 +98,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                       item.isBought,
                       (value) {
                         if (value != null) {
-                          shoppingProv.toggleItemStatus(item.id, value);
+                          shoppingProv.toggleItem(item.id, value);
                         }
                       },
                     );
