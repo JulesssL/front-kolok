@@ -121,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 else if (chatProv.messages.isEmpty)
                   const Text("Aucun message")
                 else
-                  ...chatProv.messages.take(3).map((m) => _buildFeedItem(m.sender?.name?[0].toUpperCase() ?? '?', m.content, "Aujourd'hui", m.sender?.avatarUrl)),
+                  ...chatProv.messages.take(5).map((m) => _buildFeedItem(m.sender?.name?[0].toUpperCase() ?? '?', m.content, "Aujourd'hui", m.sender?.avatarUrl)),
                 const SizedBox(height: 80),
               ],
             ),

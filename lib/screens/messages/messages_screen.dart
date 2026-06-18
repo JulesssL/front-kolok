@@ -246,40 +246,41 @@ class _MessagesScreenState extends State<MessagesScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (!isMe) ...[
-            CircleAvatar(
-              radius: 14,
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              backgroundImage: sender?.avatarUrl != null && sender!.avatarUrl!.isNotEmpty
-                  ? CachedNetworkImageProvider(sender.avatarUrl!)
-                  : null,
-              child: sender?.avatarUrl == null || sender!.avatarUrl!.isEmpty
-                  ? Text(initial, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))
-                  : null,
-            ),
-            const SizedBox(width: 8),
-          ],
-          Flexible(
+          CircleAvatar(
+            radius: 16,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            backgroundImage: sender?.avatarUrl != null && sender!.avatarUrl!.isNotEmpty
+                ? CachedNetworkImageProvider(sender.avatarUrl!)
+                : null,
+            child: sender?.avatarUrl == null || sender!.avatarUrl!.isEmpty
+                ? Text(initial, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
             child: Column(
-              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (!isMe)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 4, bottom: 4),
-                    child: Text(senderName, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      isMe ? 'Moi' : senderName, 
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)
+                    ),
+                    Text(time, style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
+                  ],
+                ),
+                const SizedBox(height: 4),
                 Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isMe ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(20).copyWith(
-                      bottomLeft: isMe ? const Radius.circular(20) : const Radius.circular(0),
-                      bottomRight: isMe ? const Radius.circular(0) : const Radius.circular(20),
-                    ),
-                    boxShadow: isMe ? [] : [
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.05),
                         blurRadius: 5,
@@ -290,19 +291,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   child: Text(
                     text,
                     style: TextStyle(
-                      color: isMe ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                       fontSize: 14,
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 4, right: 4),
-                  child: Text(time, style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
-                ),
               ],
             ),
           ),
-          if (isMe) const SizedBox(width: 22), 
         ],
       ),
     );
