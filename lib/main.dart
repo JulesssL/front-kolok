@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'screens/onboarding/welcome_screen.dart'; 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/main_screen.dart';
+import 'screens/kolok/kolok_setup_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'providers/auth_provider.dart';
 import 'providers/kolok_provider.dart';
@@ -102,6 +103,9 @@ class KolokApp extends StatelessWidget {
           home: Consumer<AuthProvider>(
             builder: (context, authProvider, child) {
               if (authProvider.isAuthenticated) {
+                if (authProvider.currentUser?.kolok == null) {
+                  return const KolokSetupScreen();
+                }
                 return const MainScreen();
               } else {
                 return const WelcomeScreen();

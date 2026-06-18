@@ -10,9 +10,9 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFF2E3192)),
@@ -99,25 +99,37 @@ class SettingsScreen extends StatelessWidget {
                         padding: EdgeInsets.only(top: 8.0),
                         child: CircularProgressIndicator(),
                       ),
+                    const SizedBox(height: 16),
+                    if (user?.kolok != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              "Code pour rejoindre :",
+                              style: TextStyle(color: Theme.of(context).colorScheme.primary, fontSize: 12, fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              user!.kolok!.joinCode,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                   ],
                 );
               },
-            ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.share, color: Colors.white, size: 18),
-              label: const Text(
-                "Envoyer une invitation",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2E3192),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
             ),
             const SizedBox(height: 32),
             Container(
@@ -158,8 +170,12 @@ class SettingsScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Center(
                     child: TextButton(
-                      onPressed: () {},
-                      child: const Text("Voir toutes les règles >", style: TextStyle(color: Color(0xFF2E3192), fontWeight: FontWeight.bold)),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Bientôt disponible')),
+                        );
+                      },
+                      child: Text("Voir toutes les règles >", style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
@@ -205,35 +221,42 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
             const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.05),
-                    blurRadius: 10,
-                    spreadRadius: 2,
-                  )
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2E3192).withOpacity(0.1),
-                      shape: BoxShape.circle,
+            GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Bientôt disponible')),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.05),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    )
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.help_outline, color: Theme.of(context).colorScheme.primary, size: 20),
                     ),
-                    child: const Icon(Icons.help_outline, color: Color(0xFF2E3192), size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text("Aide & Support", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  ),
-                  Icon(Icons.chevron_right, color: Colors.grey.shade400),
-                ],
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text("Aide & Support", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                    Icon(Icons.chevron_right, color: Colors.grey.shade400),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 16),

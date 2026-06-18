@@ -31,8 +31,7 @@ class ShoppingService {
 
   Future<void> toggleItem(String id, bool isBought) async {
     final response = await apiClient.patch(
-      '/shopping-list/$id',
-      body: {'is_bought': isBought},
+      '/shopping-list/$id/toggle',
     );
 
     if (response.statusCode != 200) {

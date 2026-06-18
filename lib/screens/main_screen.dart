@@ -42,10 +42,13 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: _pages[_currentIndex],
 
-      floatingActionButton: SizedBox(
+      floatingActionButton: isKeyboardVisible ? null : SizedBox(
         height: 65,
         width: 65,
         child: FloatingActionButton(
@@ -60,9 +63,9 @@ class _MainScreenState extends State<MainScreen> {
           ), 
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: isKeyboardVisible ? null : FloatingActionButtonLocation.centerDocked,
 
-      bottomNavigationBar: BottomAppBar(
+      bottomNavigationBar: isKeyboardVisible ? null : BottomAppBar(
         height: 85,
         color: Theme.of(context).colorScheme.surface,
         padding: EdgeInsets.zero,
@@ -72,7 +75,7 @@ class _MainScreenState extends State<MainScreen> {
             _buildNavItem("home", "Accueil", 0),
             _buildNavItem("tasks", "Tâches", 1),
 
-            Expanded(child: const SizedBox.shrink()), // Center spacer
+            const Expanded(child: SizedBox.shrink()), // Center spacer
 
             _buildNavItem("budget", "Budget", 3),
             _buildNavItem("courses", "Courses", 4),

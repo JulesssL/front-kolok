@@ -30,14 +30,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         title: Text(
           "KOLOK",
           style: TextStyle(
-            color: const Color(0xFF2E3192),
+            color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.w800,
             fontSize: 24,
             fontFamily: 'Gilroy',
@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
               child: CircleAvatar(
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 child: Icon(Icons.person_outline, color: Colors.grey.shade700),
               ),
             ),
@@ -72,21 +72,30 @@ class _HomeScreenState extends State<HomeScreen> {
           // Simple balance logic for now
           final totalExpenses = expenseProv.expenses.fold(0.0, (sum, e) => sum + e.amount);
 
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+          return RefreshIndicator(
+            onRefresh: () async {
+              await Future.wait([
+                context.read<TaskProvider>().fetchTasks(),
+                context.read<ExpenseProvider>().fetchExpenses(),
+                context.read<ShoppingProvider>().fetchItems(),
+                context.read<ChatProvider>().fetchMessages(),
+              ]);
+            },
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildKolokStatusCard(doneTasks, totalTasks, totalExpenses, pendingItems),
                 const SizedBox(height: 24),
-                _buildSectionHeader("Mes tâches du jour", "Priorité absolue"),
+                _buildSectionHeader("Mes tâches", ""),
                 const SizedBox(height: 12),
                 if (taskProv.isLoading)
                   const Center(child: CircularProgressIndicator())
                 else if (tasks.isEmpty)
                   const Text("Aucune tâche pour le moment")
                 else
-                  ...tasks.take(3).map((t) => _buildTaskItem(t.title, t.status == 'done' ? 'BASSE' : 'HAUTE', t.status == 'done' ? const Color(0xFF4CE0B3) : const Color(0xFFFF6B6B))),
+                  ...tasks.take(3).map((t) => _buildTaskItem(t.title, t.status == 'done')),
                 const SizedBox(height: 24),
                 const Text(
                   "Fil d'actualité",
@@ -102,6 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 80),
               ],
             ),
+            ),
           );
         },
       ),
@@ -112,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -139,9 +149,9 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStatusIndicator("$doneTasks/$totalTasks", "Tâches", const Color(0xFF2E3192)),
-              _buildStatusIndicator("${totalExpenses.toStringAsFixed(0)}€", "Balance", const Color(0xFF2E3192)),
-              _buildStatusIndicator("$pendingItems", "Courses", const Color(0xFF2E3192)),
+              _buildStatusIndicator("$doneTasks/$totalTasks", "Tâches", Theme.of(context).colorScheme.primary),
+              _buildStatusIndicator("${totalExpenses.toStringAsFixed(0)}€", "Balance", Theme.of(context).colorScheme.primary),
+              _buildStatusIndicator("$pendingItems", "Courses", Theme.of(context).colorScheme.primary),
             ],
           )
         ],
@@ -196,12 +206,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTaskItem(String title, String priority, Color priorityColor) {
+  Widget _buildTaskItem(String title, bool isDone) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -217,34 +227,23 @@ class _HomeScreenState extends State<HomeScreen> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: const Color(0xFF2E3192).withOpacity(0.1),
+              color: isDone ? const Color(0xFF4CE0B3).withOpacity(0.1) : Theme.of(context).colorScheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.cleaning_services, color: Color(0xFF2E3192), size: 20),
+            child: Icon(Icons.cleaning_services, color: isDone ? const Color(0xFF4CE0B3) : Theme.of(context).colorScheme.primary, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: priorityColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: priorityColor.withOpacity(0.5)),
-            ),
-            child: Text(
-              priority,
               style: TextStyle(
-                color: priorityColor,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600, 
+                fontSize: 14,
+                decoration: isDone ? TextDecoration.lineThrough : null,
+                color: isDone ? Colors.grey.shade500 : null,
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -256,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: const Color(0xFF2E3192),
+            backgroundColor: Theme.of(context).colorScheme.primary,
             radius: 18,
             child: Text(
               initial,

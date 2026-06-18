@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/shopping_provider.dart';
+import '../settings/settings_screen.dart';
 class ShoppingScreen extends StatefulWidget {
   const ShoppingScreen({super.key});
 
@@ -30,14 +31,14 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        title: const Text(
+        title: Text(
           "KOLOK",
           style: TextStyle(
-            color: Color(0xFF2E3192),
+            color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.w800,
             fontSize: 24,
             fontFamily: 'Gilroy',
@@ -46,9 +47,17 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person_outline, color: Colors.grey.shade700),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                );
+              },
+              child: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                child: Icon(Icons.person_outline, color: Colors.grey.shade700),
+              ),
             ),
           )
         ],
@@ -134,7 +143,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   Widget _buildInputAdd() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
@@ -146,6 +155,16 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
       ),
       child: TextField(
         controller: _itemController,
+        onSubmitted: (value) async {
+          if (value.isNotEmpty) {
+            try {
+              await context.read<ShoppingProvider>().createItem(value, null);
+              _itemController.clear();
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+            }
+          }
+        },
         decoration: InputDecoration(
           hintText: "Ajouter un article...",
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
@@ -154,13 +173,17 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
           suffixIcon: Padding(
             padding: const EdgeInsets.all(8.0),
             child: CircleAvatar(
-              backgroundColor: const Color(0xFF2E3192),
+              backgroundColor: Theme.of(context).colorScheme.primary,
               child: IconButton(
                 icon: const Icon(Icons.add, color: Colors.white, size: 20),
-                onPressed: () {
+                onPressed: () async {
                   if (_itemController.text.isNotEmpty) {
-                    context.read<ShoppingProvider>().createItem(_itemController.text, null);
-                    _itemController.clear();
+                    try {
+                      await context.read<ShoppingProvider>().createItem(_itemController.text, null);
+                      _itemController.clear();
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                    }
                   }
                 },
               ),
@@ -176,7 +199,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -201,12 +224,12 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
                 decoration: isChecked ? TextDecoration.lineThrough : null,
-                color: isChecked ? Colors.grey.shade500 : Colors.black,
+                color: isChecked ? Colors.grey.shade500 : Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
           ),
           CircleAvatar(
-            backgroundColor: const Color(0xFF2E3192),
+            backgroundColor: Theme.of(context).colorScheme.primary,
             radius: 14,
             child: Text(initial, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
           ),

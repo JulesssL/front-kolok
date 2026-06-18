@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import '../../models/user.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../settings/settings_screen.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -32,14 +35,14 @@ class _MessagesScreenState extends State<MessagesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF8F9FA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        title: const Text(
+        title: Text(
           "KOLOK",
           style: TextStyle(
-            color: Color(0xFF2E3192),
+            color: Theme.of(context).colorScheme.primary,
             fontWeight: FontWeight.w800,
             fontSize: 24,
             fontFamily: 'Gilroy',
@@ -48,9 +51,17 @@ class _MessagesScreenState extends State<MessagesScreen> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person_outline, color: Colors.grey.shade700),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                );
+              },
+              child: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                child: Icon(Icons.person_outline, color: Colors.grey.shade700),
+              ),
             ),
           )
         ],
@@ -66,23 +77,53 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   "Chat Coloc",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                Text(
-                  "4 colocataires",
-                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold),
+                Consumer2<ChatProvider, AuthProvider>(
+                  builder: (context, chatProv, authProv, child) {
+                    final uniqueUsers = <String, User>{};
+                    if (authProv.currentUser != null) {
+                      uniqueUsers[authProv.currentUser!.id] = authProv.currentUser!;
+                    }
+                    for (var msg in chatProv.messages) {
+                      if (msg.sender != null) {
+                        uniqueUsers[msg.sender!.id] = msg.sender!;
+                      }
+                    }
+                    // Minimum 1 to account for the current user even if no messages
+                    final count = uniqueUsers.isEmpty ? 1 : uniqueUsers.length;
+                    return Text(
+                      "$count colocataire${count > 1 ? 's' : ''}",
+                      style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold),
+                    );
+                  }
                 ),
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Row(
-              children: [
-                _buildOverlappingAvatar("S", const Color(0xFF2E3192)),
-                _buildOverlappingAvatar("M", const Color(0xFF2E3192)),
-                _buildOverlappingAvatar("L", const Color(0xFF2E3192)),
-                _buildOverlappingAvatar("E", const Color(0xFF2E3192)),
-              ],
-            ),
+          Consumer2<ChatProvider, AuthProvider>(
+            builder: (context, chatProv, authProv, child) {
+              final uniqueUsers = <String, User>{};
+              if (authProv.currentUser != null) {
+                uniqueUsers[authProv.currentUser!.id] = authProv.currentUser!;
+              }
+              for (var msg in chatProv.messages) {
+                if (msg.sender != null) {
+                  uniqueUsers[msg.sender!.id] = msg.sender!;
+                }
+              }
+              
+              if (uniqueUsers.isEmpty) {
+                return const SizedBox(height: 36);
+              }
+              
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Row(
+                  children: uniqueUsers.values.take(5).map((user) {
+                    return _buildOverlappingAvatar(user, Theme.of(context).colorScheme.primary);
+                  }).toList(),
+                ),
+              );
+            }
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -100,88 +141,97 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   itemBuilder: (context, index) {
                     final msg = chatProv.messages[index];
                     final isMe = msg.sender?.id == authProv.currentUser?.id;
-                    final senderName = msg.sender?.name ?? 'Inconnu';
-                    final initial = senderName.isNotEmpty ? senderName[0].toUpperCase() : '?';
                     
                     return _buildMessageBubble(
-                      senderName, 
+                      msg.sender, 
                       msg.content, 
                       "Aujourd'hui", // format date properly later
                       isMe, 
-                      initial
                     );
                   },
                 );
               },
             ),
           ),
-        ],
-      ),
-      bottomSheet: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-        child: Row(
-          children: [
-            Icon(Icons.attach_file, color: Colors.grey.shade400),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: TextField(
-                  controller: _messageController,
-                  decoration: InputDecoration(
-                    hintText: "Écrire un message...",
-                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                    border: InputBorder.none,
+          Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: TextField(
+                      controller: _messageController,
+                      onSubmitted: (value) {
+                        if (value.isNotEmpty) {
+                          context.read<ChatProvider>().sendMessage(value);
+                          _messageController.clear();
+                        }
+                      },
+                      decoration: InputDecoration(
+                        hintText: "Écrire un message...",
+                        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                        border: InputBorder.none,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                CircleAvatar(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  child: IconButton(
+                    icon: const Icon(Icons.send, color: Colors.white, size: 18),
+                    onPressed: () {
+                      if (_messageController.text.isNotEmpty) {
+                        context.read<ChatProvider>().sendMessage(_messageController.text);
+                        _messageController.clear();
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            CircleAvatar(
-              backgroundColor: const Color(0xFF2E3192),
-              child: IconButton(
-                icon: const Icon(Icons.send, color: Colors.white, size: 18),
-                onPressed: () {
-                  if (_messageController.text.isNotEmpty) {
-                    context.read<ChatProvider>().sendMessage(_messageController.text);
-                    _messageController.clear();
-                  }
-                },
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildAvatar(String initial, Color color) {
+  Widget _buildAvatar(User user, Color color) {
+    final initial = user.name.isNotEmpty ? user.name[0].toUpperCase() : '?';
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
+        border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 2),
       ),
       child: CircleAvatar(
         radius: 16,
         backgroundColor: color,
-        child: Text(initial, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+        backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+            ? CachedNetworkImageProvider(user.avatarUrl!)
+            : null,
+        child: user.avatarUrl == null || user.avatarUrl!.isEmpty
+            ? Text(initial, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))
+            : null,
       ),
     );
   }
 
-  Widget _buildOverlappingAvatar(String initial, Color color) {
+  Widget _buildOverlappingAvatar(User user, Color color) {
     return Align(
       widthFactor: 0.7,
-      child: _buildAvatar(initial, color),
+      child: _buildAvatar(user, color),
     );
   }
 
-  Widget _buildMessageBubble(String sender, String text, String time, bool isMe, String initial) {
+  Widget _buildMessageBubble(User? sender, String text, String time, bool isMe) {
+    final senderName = sender?.name ?? 'Inconnu';
+    final initial = senderName.isNotEmpty ? senderName[0].toUpperCase() : '?';
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Row(
@@ -191,8 +241,13 @@ class _MessagesScreenState extends State<MessagesScreen> {
           if (!isMe) ...[
             CircleAvatar(
               radius: 14,
-              backgroundColor: const Color(0xFF2E3192),
-              child: Text(initial, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              backgroundImage: sender?.avatarUrl != null && sender!.avatarUrl!.isNotEmpty
+                  ? CachedNetworkImageProvider(sender.avatarUrl!)
+                  : null,
+              child: sender?.avatarUrl == null || sender!.avatarUrl!.isEmpty
+                  ? Text(initial, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))
+                  : null,
             ),
             const SizedBox(width: 8),
           ],
@@ -203,12 +258,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
                 if (!isMe)
                   Padding(
                     padding: const EdgeInsets.only(left: 4, bottom: 4),
-                    child: Text(sender, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                    child: Text(senderName, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                   ),
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isMe ? const Color(0xFF2E3192) : Colors.white,
+                    color: isMe ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
                     borderRadius: BorderRadius.circular(20).copyWith(
                       bottomLeft: isMe ? const Radius.circular(20) : const Radius.circular(0),
                       bottomRight: isMe ? const Radius.circular(0) : const Radius.circular(20),
@@ -224,7 +279,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   child: Text(
                     text,
                     style: TextStyle(
-                      color: isMe ? Colors.white : Colors.black87,
+                      color: isMe ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
                       fontSize: 14,
                     ),
                   ),
