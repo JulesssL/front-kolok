@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../models/task.dart';
+import '../../widgets/task_details_modal.dart';
 import '../../providers/task_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/user.dart';
@@ -49,6 +51,10 @@ class _TasksScreenState extends State<TasksScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: Icon(Icons.add_circle, color: Theme.of(context).colorScheme.primary, size: 28),
+            onPressed: () => _showAddTaskModal(context),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: GestureDetector(
@@ -80,7 +86,6 @@ class _TasksScreenState extends State<TasksScreen> {
       body: Column(
         children: [
           _buildTabs(),
-          _buildFilters(),
           Expanded(
             child: RefreshIndicator(
               onRefresh: _refreshTasks,
@@ -89,26 +94,6 @@ class _TasksScreenState extends State<TasksScreen> {
           ),
         ],
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 40.0),
-        child: ElevatedButton.icon(
-          onPressed: () => _showAddTaskModal(context),
-          icon: const Icon(Icons.add, color: Color(0xFF2E3192)),
-          label: const Text(
-            "AJOUTER UNE TÂCHE",
-            style: TextStyle(color: Color(0xFF2E3192), fontWeight: FontWeight.bold),
-          ),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
-              side: const BorderSide(color: Color(0xFF2E3192)),
-            ),
-          ),
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
@@ -243,11 +228,8 @@ class _TasksScreenState extends State<TasksScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
           children: [
             ...filteredTasks.map((t) => _buildTaskCard(
-              t.id,
+              t,
               Icons.cleaning_services_outlined, 
-              t.title, 
-              t.description ?? (t.dueDate != null ? "Pour le ${DateFormat('dd/MM/yyyy').format(t.dueDate!)}" : "Aucune description"),
-              t.status,
             )),
             const SizedBox(height: 100),
           ],
@@ -290,15 +272,9 @@ class _TasksScreenState extends State<TasksScreen> {
             ),
             const SizedBox(height: 16),
             ...filteredTasks.map((t) {
-              final assignedName = t.assignedTo?.name ?? "Non assigné";
-              final initial = assignedName.isNotEmpty ? assignedName[0].toUpperCase() : "?";
               return _buildPlanningItem(
-                initial, 
-                t.title, 
-                assignedName, 
-                t.dueDate != null ? "${t.dueDate!.day}/${t.dueDate!.month}" : "-", 
+                t, 
                 Theme.of(context).colorScheme.primary,
-                t.assignedTo?.avatarUrl
               );
             }),
             const SizedBox(height: 100),
@@ -308,11 +284,14 @@ class _TasksScreenState extends State<TasksScreen> {
     );
   }
 
-  Widget _buildTaskCard(String id, IconData icon, String title, String subtitle, String status) {
-    bool isDone = status == 'done';
+  Widget _buildTaskCard(Task task, IconData icon) {
+    bool isDone = task.status == 'done';
+    String subtitle = task.description ?? (task.dueDate != null ? "Pour le ${DateFormat('dd/MM/yyyy').format(task.dueDate!)}" : "Aucune description");
     
-    return Dismissible(
-      key: Key(id),
+    return GestureDetector(
+      onTap: () => showTaskDetailsModal(context, task),
+      child: Dismissible(
+        key: Key(task.id),
       background: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
@@ -335,11 +314,10 @@ class _TasksScreenState extends State<TasksScreen> {
       ),
       onDismissed: (direction) {
         if (direction == DismissDirection.endToStart) {
-          context.read<TaskProvider>().deleteTask(id);
+          context.read<TaskProvider>().deleteTask(task.id);
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Tâche supprimée")));
         } else if (direction == DismissDirection.startToEnd) {
-          context.read<TaskProvider>().updateTaskStatus(id, 'done');
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Tâche validée !")));
+          context.read<TaskProvider>().updateTaskStatus(task.id, 'done');
         }
       },
       child: Container(
@@ -376,16 +354,14 @@ class _TasksScreenState extends State<TasksScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          title, 
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold, 
-                            fontSize: 15,
-                            decoration: isDone ? TextDecoration.lineThrough : null,
-                            color: isDone ? Colors.grey : null,
-                          ),
+                          task.title,
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, decoration: isDone ? TextDecoration.lineThrough : null, color: isDone ? Colors.grey : null),
                         ),
                         const SizedBox(height: 4),
-                        Text(subtitle, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                        Text(
+                          subtitle,
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13, decoration: isDone ? TextDecoration.lineThrough : null),
+                        ),
                       ],
                     ),
                   ),
@@ -413,11 +389,19 @@ class _TasksScreenState extends State<TasksScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 
-  Widget _buildPlanningItem(String initial, String taskName, String personName, String day, Color avatarColor, String? avatarUrl) {
-    return Container(
+  Widget _buildPlanningItem(Task task, Color avatarColor) {
+    final assignedName = task.assignedTo?.name ?? "Non assigné";
+    final initial = assignedName.isNotEmpty ? assignedName[0].toUpperCase() : "?";
+    final day = task.dueDate != null ? "${task.dueDate!.day.toString().padLeft(2, '0')}/${task.dueDate!.month.toString().padLeft(2, '0')}" : "-";
+    final avatarUrl = task.assignedTo?.avatarUrl;
+
+    return GestureDetector(
+      onTap: () => showTaskDetailsModal(context, task),
+      child: Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -444,14 +428,28 @@ class _TasksScreenState extends State<TasksScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(taskName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                Text(personName, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                Text(
+                  task.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.person_outline, size: 14, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Text(
+                      assignedName,
+                      style: const TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
           Text(day, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
         ],
       ),
+    ),
     );
   }
 

@@ -6,6 +6,8 @@ import '../../providers/shopping_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../settings/settings_screen.dart';
+import '../../widgets/task_details_modal.dart';
+import '../../models/task.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -107,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 else if (tasks.isEmpty)
                   const Text("Aucune tâche pour le moment")
                 else
-                  ...tasks.take(3).map((t) => _buildTaskItem(t.title, t.status == 'done')),
+                  ...tasks.take(3).map((t) => _buildTaskItem(t)),
                 const SizedBox(height: 24),
                 const Text(
                   "Fil d'actualité",
@@ -131,6 +133,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildKolokStatusCard(int doneTasks, int totalTasks, double totalExpenses, int pendingItems) {
+    String iconAsset = 'assets/images/smiley_orange.png';
+    double taskCompletion = totalTasks == 0 ? 1.0 : doneTasks / totalTasks;
+    
+    if (taskCompletion == 1.0 && pendingItems == 0) {
+      iconAsset = 'assets/images/smiley_green.png';
+    } else if (taskCompletion < 0.5 && pendingItems >= 3) {
+      iconAsset = 'assets/images/smiley_pink.png';
+    }
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -154,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 "Statut de la Kolok",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              Icon(Icons.home_outlined, color: Colors.grey.shade400),
+              Image.asset(iconAsset, width: 32, height: 32),
             ],
           ),
           const SizedBox(height: 20),
@@ -218,45 +229,51 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTaskItem(String title, bool isDone) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.05),
-            blurRadius: 5,
-            spreadRadius: 2,
-          )
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: isDone ? const Color(0xFF4CE0B3).withOpacity(0.1) : Theme.of(context).colorScheme.primary.withOpacity(0.1),
-              shape: BoxShape.circle,
+  Widget _buildTaskItem(Task task) {
+    bool isDone = task.status == 'done';
+    return GestureDetector(
+      onTap: () {
+        showTaskDetailsModal(context, task);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.05),
+              blurRadius: 5,
+              spreadRadius: 2,
+            )
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: isDone ? const Color(0xFF4CE0B3).withOpacity(0.1) : Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.cleaning_services, color: isDone ? const Color(0xFF4CE0B3) : Theme.of(context).colorScheme.primary, size: 20),
             ),
-            child: Icon(Icons.cleaning_services, color: isDone ? const Color(0xFF4CE0B3) : Theme.of(context).colorScheme.primary, size: 20),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.w600, 
-                fontSize: 14,
-                decoration: isDone ? TextDecoration.lineThrough : null,
-                color: isDone ? Colors.grey.shade500 : null,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                task.title,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600, 
+                  fontSize: 14,
+                  decoration: isDone ? TextDecoration.lineThrough : null,
+                  color: isDone ? Colors.grey.shade500 : null,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

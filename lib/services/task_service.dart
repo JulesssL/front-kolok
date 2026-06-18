@@ -33,7 +33,7 @@ class TaskService {
 
   Future<void> updateTaskStatus(String taskId, String status) async {
     final response = await apiClient.patch(
-      '/tasks/$taskId',
+      '/tasks/$taskId/status',
       body: {'status': status},
     );
 
