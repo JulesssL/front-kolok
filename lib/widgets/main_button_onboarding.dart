@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class MainButton extends StatelessWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final Color color;
   final Color textColor;
 
@@ -15,16 +15,18 @@ class MainButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDisabled = onPressed == null;
     return SizedBox(
       width: double.infinity, 
       height: 55,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: color,
+          backgroundColor: isDisabled ? Colors.grey.shade300 : color,
+          foregroundColor: isDisabled ? Colors.grey.shade500 : textColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         ),
         onPressed: onPressed,
-        child: Text(text, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+        child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }

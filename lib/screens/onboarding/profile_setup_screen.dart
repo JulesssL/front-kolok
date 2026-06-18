@@ -20,6 +20,21 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _nomController = TextEditingController();
   
   bool _isLoading = false;
+  bool _isFormValid = false;
+
+  void _validateForm() {
+    setState(() {
+      _isFormValid = _prenomController.text.trim().isNotEmpty && 
+                     _nomController.text.trim().isNotEmpty;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _prenomController.addListener(_validateForm);
+    _nomController.addListener(_validateForm);
+  }
 
   @override
   void dispose() {
@@ -129,7 +144,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                       : MainButton(
                           text: "SUIVANT",
                           color: const Color(0xFF918EF4),
-                          onPressed: _registerUser, 
+                          onPressed: _isFormValid ? _registerUser : null, 
                         ),
                   const SizedBox(height: 20),
                 ],

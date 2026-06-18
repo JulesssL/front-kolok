@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../models/user.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -10,15 +11,20 @@ class AuthProvider with ChangeNotifier {
   bool _isAuthenticated = false;
   bool get isAuthenticated => _isAuthenticated;
 
+  User? _currentUser;
+  User? get currentUser => _currentUser;
+
   Future<void> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       await _authService.login(email: email, password: password);
+      _currentUser = await _authService.getMe();
       _isAuthenticated = true;
     } catch (e) {
       _isAuthenticated = false;
+      _currentUser = null;
       rethrow;
     } finally {
       _isLoading = false;
@@ -41,15 +47,23 @@ class AuthProvider with ChangeNotifier {
   Future<void> logout() async {
     await _authService.logout();
     _isAuthenticated = false;
+    _currentUser = null;
     notifyListeners();
   }
 
   Future<void> checkAuthStatus() async {
     final token = await _authService.getToken();
     if (token != null) {
-      _isAuthenticated = true;
+      try {
+        _currentUser = await _authService.getMe();
+        _isAuthenticated = true;
+      } catch (e) {
+        _isAuthenticated = false;
+        _currentUser = null;
+      }
     } else {
       _isAuthenticated = false;
+      _currentUser = null;
     }
     notifyListeners();
   }

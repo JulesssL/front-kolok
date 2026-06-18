@@ -16,6 +16,24 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  bool _isFormValid = false;
+
+  void _validateForm() {
+    setState(() {
+      _isFormValid = _emailController.text.trim().isNotEmpty && 
+                     _passwordController.text.isNotEmpty &&
+                     _confirmPasswordController.text.isNotEmpty;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_validateForm);
+    _passwordController.addListener(_validateForm);
+    _confirmPasswordController.addListener(_validateForm);
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -111,7 +129,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   
                   MainButton(
                     text: "S'INSCRIRE", 
-                    onPressed: _submitForm,
+                    onPressed: _isFormValid ? _submitForm : null,
                   ),
                 ],
               ),

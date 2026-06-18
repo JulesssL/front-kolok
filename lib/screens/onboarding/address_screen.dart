@@ -48,7 +48,7 @@ class _AddressScreenState extends State<AddressScreen> {
           context,
           MaterialPageRoute(
             builder: (context) => InviteScreen(
-              joinCode: kolokData['joinCode'] ?? 'ERREUR', 
+              joinCode: kolokData['join_code'] ?? 'ERREUR', 
               kolokName: kolokData['name'],
             ),
           ),

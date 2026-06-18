@@ -17,6 +17,22 @@ class _LogInScreenState extends State<LogInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  bool _isFormValid = false;
+
+  void _validateForm() {
+    setState(() {
+      _isFormValid = _emailController.text.trim().isNotEmpty && 
+                     _passwordController.text.isNotEmpty;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_validateForm);
+    _passwordController.addListener(_validateForm);
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -110,7 +126,7 @@ class _LogInScreenState extends State<LogInScreen> {
                   
                   MainButton(
                     text: "SE CONNECTER", 
-                    onPressed: _submitForm,
+                    onPressed: _isFormValid ? _submitForm : null,
                   ),
                 ],
               ),

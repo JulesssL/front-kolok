@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import '../providers/task_provider.dart';
+import '../providers/expense_provider.dart';
+import '../providers/shopping_provider.dart';
+import '../providers/chat_provider.dart';
 import 'home/home_screen.dart';
 import 'tasks/tasks_screen.dart';
 import 'budget/budget_screen.dart';
@@ -15,6 +20,17 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TaskProvider>().fetchTasks();
+      context.read<ExpenseProvider>().fetchExpenses();
+      context.read<ShoppingProvider>().fetchItems();
+      context.read<ChatProvider>().fetchMessages();
+    });
+  }
 
   final List<Widget> _pages = [
     const HomeScreen(),

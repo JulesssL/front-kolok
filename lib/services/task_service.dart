@@ -1,26 +1,10 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/task.dart';
+import '../core/network/api_client.dart';
 
 class TaskService {
-  final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
-  final storage = const FlutterSecureStorage();
-
   Future<List<Task>> getTasks() async {
-    final token = await storage.read(key: 'jwt_token');
-    if (token == null) throw Exception("Non autorisé");
-
-    final url = Uri.parse('$baseUrl/tasks');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
+    final response = await apiClient.get('/tasks');
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((json) => Task.fromJson(json)).toList();
@@ -30,21 +14,13 @@ class TaskService {
   }
 
   Future<Task> createTask(String title, String? description, String? dueDate) async {
-    final token = await storage.read(key: 'jwt_token');
-    if (token == null) throw Exception("Non autorisé");
-
-    final url = Uri.parse('$baseUrl/tasks');
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
+    final response = await apiClient.post(
+      '/tasks',
+      body: {
         'title': title,
         if (description != null) 'description': description,
         if (dueDate != null) 'due_date': dueDate,
-      }),
+      },
     );
 
     if (response.statusCode == 201) {
@@ -55,17 +31,9 @@ class TaskService {
   }
 
   Future<void> updateTaskStatus(String taskId, String status) async {
-    final token = await storage.read(key: 'jwt_token');
-    if (token == null) throw Exception("Non autorisé");
-
-    final url = Uri.parse('$baseUrl/tasks/$taskId');
-    final response = await http.patch(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({'status': status}),
+    final response = await apiClient.patch(
+      '/tasks/$taskId',
+      body: {'status': status},
     );
 
     if (response.statusCode != 200) {

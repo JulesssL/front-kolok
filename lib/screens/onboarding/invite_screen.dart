@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../widgets/main_button_onboarding.dart';
+import '../../providers/auth_provider.dart';
 import '../main_screen.dart';
 
 class InviteScreen extends StatelessWidget {
@@ -98,19 +100,26 @@ class InviteScreen extends StatelessWidget {
                 border: Border.all(color: Colors.grey.shade100),
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: ListTile(
-                leading: const CircleAvatar(
-                  backgroundColor: Color(0xFF2E3192),
-                  child: Text("J", style: TextStyle(color: Colors.white)),
-                ),
-                title: const Text(
-                  "Jean Dupont",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                subtitle: const Text(
-                  "Vous (Administrateur)",
-                  style: TextStyle(fontSize: 12),
-                ),
+              child: Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  final user = authProvider.currentUser;
+                  final userName = user?.name ?? "Inconnu";
+                  final initial = userName.isNotEmpty ? userName[0].toUpperCase() : "?";
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: const Color(0xFF2E3192),
+                      child: Text(initial, style: const TextStyle(color: Colors.white)),
+                    ),
+                    title: Text(
+                      userName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: const Text(
+                      "Vous (Administrateur)",
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  );
+                },
               ),
             ),
 

@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/task_provider.dart';
+import '../../providers/expense_provider.dart';
+import '../../providers/shopping_provider.dart';
+import '../../providers/chat_provider.dart';
 import '../settings/settings_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -38,34 +43,54 @@ class HomeScreen extends StatelessWidget {
           )
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildKolokStatusCard(),
-            const SizedBox(height: 24),
-            _buildSectionHeader("Mes tâches du jour", "Priorité absolue"),
-            const SizedBox(height: 12),
-            _buildTaskItem("Sortir les poubelles", "HAUTE", const Color(0xFFFF6B6B)),
-            _buildTaskItem("Nettoyer la salle de bain", "MOYENNE", const Color(0xFFFFB020)),
-            _buildTaskItem("Passer l'aspirateur", "BASSE", const Color(0xFF4CE0B3)),
-            const SizedBox(height: 24),
-            const Text(
-              "Fil d'actualité",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      body: Consumer4<TaskProvider, ExpenseProvider, ShoppingProvider, ChatProvider>(
+        builder: (context, taskProv, expenseProv, shoppingProv, chatProv, child) {
+          final tasks = taskProv.tasks;
+          final doneTasks = tasks.where((t) => t.status == 'done').length;
+          final totalTasks = tasks.length;
+          
+          final pendingItems = shoppingProv.items.where((i) => !i.isBought).length;
+          
+          // Simple balance logic for now
+          final totalExpenses = expenseProv.expenses.fold(0.0, (sum, e) => sum + e.amount);
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildKolokStatusCard(doneTasks, totalTasks, totalExpenses, pendingItems),
+                const SizedBox(height: 24),
+                _buildSectionHeader("Mes tâches du jour", "Priorité absolue"),
+                const SizedBox(height: 12),
+                if (taskProv.isLoading)
+                  const Center(child: CircularProgressIndicator())
+                else if (tasks.isEmpty)
+                  const Text("Aucune tâche pour le moment")
+                else
+                  ...tasks.take(3).map((t) => _buildTaskItem(t.title, t.status == 'done' ? 'BASSE' : 'HAUTE', t.status == 'done' ? const Color(0xFF4CE0B3) : const Color(0xFFFF6B6B))),
+                const SizedBox(height: 24),
+                const Text(
+                  "Fil d'actualité",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                if (chatProv.isLoading)
+                  const Center(child: CircularProgressIndicator())
+                else if (chatProv.messages.isEmpty)
+                  const Text("Aucun message")
+                else
+                  ...chatProv.messages.take(3).map((m) => _buildFeedItem(m.sender?.name?[0].toUpperCase() ?? '?', m.content, "Aujourd'hui")),
+                const SizedBox(height: 80),
+              ],
             ),
-            const SizedBox(height: 12),
-            _buildFeedItem("S", "Samy a payé l'électricité", "Il y a 2h"),
-            _buildFeedItem("M", "Marie a validé : Faire la vaisselle", "Il y a 5h"),
-            const SizedBox(height: 80), // Padding for bottom nav bar
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildKolokStatusCard() {
+  Widget _buildKolokStatusCard(int doneTasks, int totalTasks, double totalExpenses, int pendingItems) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -96,9 +121,9 @@ class HomeScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildStatusIndicator("12/15", "Tâches", const Color(0xFF2E3192)),
-              _buildStatusIndicator("+5€", "Balance", const Color(0xFF2E3192)),
-              _buildStatusIndicator("8", "Courses", const Color(0xFF2E3192)),
+              _buildStatusIndicator("$doneTasks/$totalTasks", "Tâches", const Color(0xFF2E3192)),
+              _buildStatusIndicator("${totalExpenses.toStringAsFixed(0)}€", "Balance", const Color(0xFF2E3192)),
+              _buildStatusIndicator("$pendingItems", "Courses", const Color(0xFF2E3192)),
             ],
           )
         ],

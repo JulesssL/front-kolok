@@ -1,26 +1,10 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/shopping_item.dart';
+import '../core/network/api_client.dart';
 
 class ShoppingService {
-  final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
-  final storage = const FlutterSecureStorage();
-
   Future<List<ShoppingItem>> getItems() async {
-    final token = await storage.read(key: 'jwt_token');
-    if (token == null) throw Exception("Non autorisé");
-
-    final url = Uri.parse('$baseUrl/shopping-list');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
-
+    final response = await apiClient.get('/shopping-list');
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((json) => ShoppingItem.fromJson(json)).toList();
@@ -30,20 +14,12 @@ class ShoppingService {
   }
 
   Future<ShoppingItem> createItem(String name, String? quantity) async {
-    final token = await storage.read(key: 'jwt_token');
-    if (token == null) throw Exception("Non autorisé");
-
-    final url = Uri.parse('$baseUrl/shopping-list');
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({
+    final response = await apiClient.post(
+      '/shopping-list',
+      body: {
         'name': name,
         if (quantity != null) 'quantity': quantity,
-      }),
+      },
     );
 
     if (response.statusCode == 201) {
@@ -54,17 +30,9 @@ class ShoppingService {
   }
 
   Future<void> toggleItem(String id, bool isBought) async {
-    final token = await storage.read(key: 'jwt_token');
-    if (token == null) throw Exception("Non autorisé");
-
-    final url = Uri.parse('$baseUrl/shopping-list/$id');
-    final response = await http.patch(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode({'is_bought': isBought}),
+    final response = await apiClient.patch(
+      '/shopping-list/$id',
+      body: {'is_bought': isBought},
     );
 
     if (response.statusCode != 200) {
