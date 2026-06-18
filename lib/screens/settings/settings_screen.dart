@@ -31,8 +31,8 @@ class SettingsScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(Icons.person, color: Colors.grey.shade700),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              child: Icon(Icons.person, color: Colors.grey.shade500),
             ),
           )
         ],
@@ -135,7 +135,7 @@ class SettingsScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -268,22 +268,22 @@ class SettingsScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFF0F0),
+                  color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
                   children: [
                     Container(
                       padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.logout, color: Color(0xFFD81B60), size: 20),
+                      child: Icon(Icons.logout, color: Theme.of(context).colorScheme.secondary, size: 20),
                     ),
                     const SizedBox(width: 12),
-                    const Expanded(
-                      child: Text("Se déconnecter", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFFD81B60))),
+                    Expanded(
+                      child: Text("Se déconnecter", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Theme.of(context).colorScheme.secondary)),
                     ),
                   ],
                 ),

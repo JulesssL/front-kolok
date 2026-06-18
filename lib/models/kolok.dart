@@ -20,7 +20,7 @@ class Kolok {
       id: json['id'],
       name: json['name'],
       address: json['address'] ?? '',
-      joinCode: json['joinCode'] ?? '',
+      joinCode: json['joinCode'] ?? json['join_code'] ?? '',
       users: json['users'] != null 
           ? (json['users'] as List).map((u) => User.fromJson(u)).toList()
           : null,
