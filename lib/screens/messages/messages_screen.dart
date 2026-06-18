@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/user.dart';
@@ -79,64 +80,29 @@ class _MessagesScreenState extends State<MessagesScreen> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Chat Coloc",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Consumer2<ChatProvider, AuthProvider>(
-                  builder: (context, chatProv, authProv, child) {
-                    final uniqueUsers = <String, User>{};
-                    if (authProv.currentUser != null) {
-                      uniqueUsers[authProv.currentUser!.id] = authProv.currentUser!;
-                    }
-                    for (var msg in chatProv.messages) {
-                      if (msg.sender != null) {
-                        uniqueUsers[msg.sender!.id] = msg.sender!;
-                      }
-                    }
-                    // Minimum 1 to account for the current user even if no messages
-                    final count = uniqueUsers.isEmpty ? 1 : uniqueUsers.length;
-                    return Text(
-                      "$count colocataire${count > 1 ? 's' : ''}",
-                      style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold),
-                    );
-                  }
-                ),
-              ],
-            ),
-          ),
           Consumer2<ChatProvider, AuthProvider>(
             builder: (context, chatProv, authProv, child) {
-              final uniqueUsers = <String, User>{};
-              if (authProv.currentUser != null) {
-                uniqueUsers[authProv.currentUser!.id] = authProv.currentUser!;
-              }
-              for (var msg in chatProv.messages) {
-                if (msg.sender != null) {
-                  uniqueUsers[msg.sender!.id] = msg.sender!;
+              final activeUsersMap = <String, User>{};
+              for (var msg in chatProv.messages.reversed) {
+                if (msg.sender != null && msg.sender!.id != authProv.currentUser?.id) {
+                  activeUsersMap[msg.sender!.id] = msg.sender!;
                 }
               }
               
-              if (uniqueUsers.isEmpty) {
-                return const SizedBox(height: 36);
+              if (activeUsersMap.isEmpty) {
+                return const SizedBox(height: 16);
               }
               
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
                 child: Row(
-                  children: uniqueUsers.values.take(5).map((user) {
+                  children: activeUsersMap.values.take(4).map((user) {
                     return _buildOverlappingAvatar(user, Theme.of(context).colorScheme.primary);
                   }).toList(),
                 ),
               );
             }
           ),
-          const SizedBox(height: 16),
           Expanded(
             child: Consumer2<ChatProvider, AuthProvider>(
               builder: (context, chatProv, authProv, child) {
@@ -156,7 +122,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     return _buildMessageBubble(
                       msg.sender, 
                       msg.content, 
-                      "Aujourd'hui", // format date properly later
+                      msg.createdAt, 
                       isMe, 
                     );
                   },
@@ -166,7 +132,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
           ),
           Container(
             color: Theme.of(context).scaffoldBackgroundColor,
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+            padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
             child: Row(
               children: [
                 Expanded(
@@ -240,47 +206,48 @@ class _MessagesScreenState extends State<MessagesScreen> {
     );
   }
 
-  Widget _buildMessageBubble(User? sender, String text, String time, bool isMe) {
+  Widget _buildMessageBubble(User? sender, String text, DateTime time, bool isMe) {
     final senderName = sender?.name ?? 'Inconnu';
     final initial = senderName.isNotEmpty ? senderName[0].toUpperCase() : '?';
+    final formattedTime = DateFormat('dd/MM HH:mm').format(time);
+    
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 16,
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            backgroundImage: sender?.avatarUrl != null && sender!.avatarUrl!.isNotEmpty
-                ? CachedNetworkImageProvider(sender.avatarUrl!)
-                : null,
-            child: sender?.avatarUrl == null || sender!.avatarUrl!.isEmpty
-                ? Text(initial, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold))
-                : null,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
+          if (!isMe) ...[
+            CircleAvatar(
+              radius: 14,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              backgroundImage: sender?.avatarUrl != null && sender!.avatarUrl!.isNotEmpty
+                  ? CachedNetworkImageProvider(sender.avatarUrl!)
+                  : null,
+              child: sender?.avatarUrl == null || sender!.avatarUrl!.isEmpty
+                  ? Text(initial, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold))
+                  : null,
+            ),
+            const SizedBox(width: 8),
+          ],
+          Flexible(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      isMe ? 'Moi' : senderName, 
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)
-                    ),
-                    Text(time, style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
-                  ],
-                ),
-                const SizedBox(height: 4),
+                if (!isMe)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 4),
+                    child: Text(senderName, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                  ),
                 Container(
-                  width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
+                    color: isMe ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(20).copyWith(
+                      bottomLeft: isMe ? const Radius.circular(20) : const Radius.circular(0),
+                      bottomRight: isMe ? const Radius.circular(0) : const Radius.circular(20),
+                    ),
+                    boxShadow: isMe ? [] : [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.05),
                         blurRadius: 5,
@@ -291,14 +258,19 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   child: Text(
                     text,
                     style: TextStyle(
-                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                      color: isMe ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
                       fontSize: 14,
                     ),
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4, right: 4),
+                  child: Text(formattedTime, style: TextStyle(fontSize: 10, color: Colors.grey.shade400)),
+                ),
               ],
             ),
           ),
+          if (isMe) const SizedBox(width: 22), 
         ],
       ),
     );

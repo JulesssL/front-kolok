@@ -48,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
       resizeToAvoidBottomInset: true,
       body: _pages[_currentIndex],
 
-      floatingActionButton: isKeyboardVisible ? null : SizedBox(
+      floatingActionButton: (isKeyboardVisible || _currentIndex == 2) ? null : SizedBox(
         height: 65,
         width: 65,
         child: FloatingActionButton(
