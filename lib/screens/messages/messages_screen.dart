@@ -99,7 +99,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   itemCount: chatProv.messages.length,
                   itemBuilder: (context, index) {
                     final msg = chatProv.messages[index];
-                    final isMe = msg.sender?.id == authProv.user?.id;
+                    final isMe = msg.sender?.id == authProv.currentUser?.id;
                     final senderName = msg.sender?.name ?? 'Inconnu';
                     final initial = senderName.isNotEmpty ? senderName[0].toUpperCase() : '?';
                     
