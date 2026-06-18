@@ -55,4 +55,15 @@ class ShoppingProvider with ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> clearBoughtItems() async {
+    try {
+      await _shoppingService.clearBoughtItems();
+      _items.removeWhere((item) => item.isBought);
+      notifyListeners();
+    } catch (e) {
+      debugPrint(e.toString());
+      rethrow;
+    }
+  }
 }

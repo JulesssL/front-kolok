@@ -35,7 +35,14 @@ class ShoppingService {
     );
 
     if (response.statusCode != 200) {
-      throw Exception('Erreur lors de la mise à jour de l\'article');
+      throw Exception('Erreur lors du changement de statut');
+    }
+  }
+
+  Future<void> clearBoughtItems() async {
+    final response = await apiClient.delete('/shopping-list/clear-bought');
+    if (response.statusCode != 200) {
+      throw Exception('Erreur lors de la suppression des articles achetés');
     }
   }
 }
