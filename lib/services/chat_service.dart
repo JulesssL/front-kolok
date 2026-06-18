@@ -23,6 +23,7 @@ class ChatService {
     final baseUrl = apiClient.baseUrl;
     _socket = IO.io(baseUrl, IO.OptionBuilder()
       .disableAutoConnect()
+      .setTransports(['websocket'])
       .setAuth({'token': 'Bearer $token'})
       .build()
     );
