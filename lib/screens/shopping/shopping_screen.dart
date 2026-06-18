@@ -133,6 +133,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                       return _buildShoppingItem(
                         item.name,
                         authorInitial,
+                        item.createdBy?.avatarUrl,
                         item.isBought,
                         (value) {
                           if (value != null) {
@@ -290,7 +291,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     );
   }
 
-  Widget _buildShoppingItem(String name, String initial, bool isChecked, ValueChanged<bool?> onChanged) {
+  Widget _buildShoppingItem(String name, String initial, String? avatarUrl, bool isChecked, ValueChanged<bool?> onChanged) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -325,9 +326,10 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
             ),
           ),
           CircleAvatar(
-            backgroundColor: Theme.of(context).colorScheme.primary,
+            backgroundColor: avatarUrl != null ? Colors.transparent : Theme.of(context).colorScheme.primary,
+            backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
             radius: 14,
-            child: Text(initial, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+            child: avatarUrl == null ? Text(initial, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)) : null,
           ),
           const SizedBox(width: 8),
         ],
