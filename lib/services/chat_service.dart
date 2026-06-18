@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../models/chat_message.dart';
 import '../core/network/api_client.dart';
 
 class ChatService {
+  IO.Socket? _socket;
+
   Future<List<ChatMessage>> getMessages() async {
     final response = await apiClient.get('/chat');
     if (response.statusCode == 200) {
@@ -13,16 +17,44 @@ class ChatService {
     }
   }
 
-  Future<ChatMessage> sendMessage(String content) async {
-    final response = await apiClient.post(
-      '/chat',
-      body: {'content': content},
+  void connect(String token, Function(ChatMessage) onMessageReceived) {
+    if (_socket != null && _socket!.connected) return;
+
+    final baseUrl = apiClient.baseUrl;
+    _socket = IO.io(baseUrl, IO.OptionBuilder()
+      .setTransports(['websocket'])
+      .disableAutoConnect()
+      .setAuth({'token': 'Bearer $token'})
+      .build()
     );
 
-    if (response.statusCode == 201) {
-      return ChatMessage.fromJson(jsonDecode(response.body));
+    _socket?.connect();
+
+    _socket?.onConnect((_) {
+      debugPrint('Connected to Chat WebSocket');
+    });
+
+    _socket?.on('newMessage', (data) {
+      if (data != null) {
+        onMessageReceived(ChatMessage.fromJson(data));
+      }
+    });
+
+    _socket?.onDisconnect((_) {
+      debugPrint('Disconnected from Chat WebSocket');
+    });
+  }
+
+  void disconnect() {
+    _socket?.disconnect();
+    _socket = null;
+  }
+
+  void sendMessage(String content) {
+    if (_socket != null && _socket!.connected) {
+      _socket?.emit('sendMessage', {'content': content});
     } else {
-      throw Exception('Erreur lors de l\'envoi du message');
+      throw Exception('Erreur: non connecté au serveur de chat');
     }
   }
 }

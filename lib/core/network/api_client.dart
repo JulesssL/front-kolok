@@ -63,6 +63,22 @@ class ApiClient {
     _handleError(response);
     return response;
   }
+
+  Future<http.Response> uploadMultipart(String endpoint, String filePath, String fileField) async {
+    final request = http.MultipartRequest('POST', Uri.parse('$baseUrl$endpoint'));
+    
+    final headers = await _getHeaders();
+    request.headers.addAll(headers);
+    request.headers.remove('Content-Type'); // Let http client set the correct multipart content type
+    
+    request.files.add(await http.MultipartFile.fromPath(fileField, filePath));
+    
+    final streamedResponse = await request.send();
+    final response = await http.Response.fromStream(streamedResponse);
+    
+    _handleError(response);
+    return response;
+  }
 }
 
 final apiClient = ApiClient();

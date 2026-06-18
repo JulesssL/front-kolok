@@ -51,6 +51,20 @@ class AuthProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> uploadAvatar(String filePath) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      _currentUser = await _authService.uploadAvatar(filePath);
+    } catch (e) {
+      debugPrint(e.toString());
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> checkAuthStatus() async {
     final token = await _authService.getToken();
     if (token != null) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/chat_message.dart';
 import '../services/chat_service.dart';
+import '../core/network/api_client.dart';
 
 class ChatProvider with ChangeNotifier {
   final ChatService _chatService = ChatService();
@@ -16,6 +17,11 @@ class ChatProvider with ChangeNotifier {
     notifyListeners();
     try {
       _messages = await _chatService.getMessages();
+      
+      final token = await apiClient.storage.read(key: 'jwt_token');
+      if (token != null) {
+        _chatService.connect(token, _onMessageReceived);
+      }
     } catch (e) {
       debugPrint(e.toString());
     } finally {
@@ -24,14 +30,25 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  Future<void> sendMessage(String content) async {
-    try {
-      final newMsg = await _chatService.sendMessage(content);
-      _messages.add(newMsg);
+  void _onMessageReceived(ChatMessage message) {
+    if (!_messages.any((m) => m.id == message.id)) {
+      _messages.add(message);
       notifyListeners();
+    }
+  }
+
+  void sendMessage(String content) {
+    try {
+      _chatService.sendMessage(content);
     } catch (e) {
       debugPrint(e.toString());
       rethrow;
     }
+  }
+
+  @override
+  void dispose() {
+    _chatService.disconnect();
+    super.dispose();
   }
 }

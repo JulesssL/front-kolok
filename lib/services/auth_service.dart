@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user.dart';
+import '../core/network/api_client.dart';
 
 class AuthService {
   final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:3000';
@@ -68,6 +69,16 @@ class AuthService {
       return User.fromJson(jsonDecode(response.body));
     } else {
       throw Exception('Impossible de récupérer l\'utilisateur');
+    }
+  }
+
+  Future<User> uploadAvatar(String filePath) async {
+    final response = await apiClient.uploadMultipart('/users/avatar', filePath, 'file');
+    
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return User.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to upload avatar');
     }
   }
 

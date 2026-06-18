@@ -50,7 +50,7 @@ class _MainScreenState extends State<MainScreen> {
         width: 65,
         child: FloatingActionButton(
           onPressed: () => setState(() => _currentIndex = 2),
-          backgroundColor: const Color(0xFF2E3192),
+          backgroundColor: Theme.of(context).colorScheme.primary,
           elevation: 4,
           shape: const CircleBorder(),
           child: const Icon(
@@ -64,7 +64,7 @@ class _MainScreenState extends State<MainScreen> {
 
       bottomNavigationBar: BottomAppBar(
         height: 85,
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         padding: EdgeInsets.zero,
         notchMargin: 6,
         child: Row(
@@ -88,6 +88,8 @@ class _MainScreenState extends State<MainScreen> {
         ? 'assets/icons/${iconName}_active.svg' 
         : 'assets/icons/${iconName}_inactive.svg';
 
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Expanded(
       child: InkWell(
         onTap: () => setState(() => _currentIndex = index),
@@ -97,7 +99,7 @@ class _MainScreenState extends State<MainScreen> {
             if (iconName == "budget")
               Icon(
                 Icons.account_balance_wallet,
-                color: isActive ? const Color(0xFF2E3192) : Colors.grey.shade400,
+                color: isActive ? primaryColor : Colors.grey.shade400,
                 size: 24,
               )
             else
@@ -105,7 +107,7 @@ class _MainScreenState extends State<MainScreen> {
                 assetPath,
                 width: 22,
                 colorFilter: ColorFilter.mode(
-                  isActive ? const Color(0xFF2E3192) : Colors.grey.shade400,
+                  isActive ? primaryColor : Colors.grey.shade400,
                   BlendMode.srcIn,
                 ),
               ),
@@ -113,7 +115,7 @@ class _MainScreenState extends State<MainScreen> {
             Text(
               label,
               style: TextStyle(
-                color: isActive ? const Color(0xFF2E3192) : Colors.grey.shade600,
+                color: isActive ? primaryColor : Colors.grey.shade600,
                 fontSize: 10,
                 fontFamily: 'Gilroy',
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,

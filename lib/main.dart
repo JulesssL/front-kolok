@@ -11,6 +11,7 @@ import 'providers/task_provider.dart';
 import 'providers/expense_provider.dart';
 import 'providers/shopping_provider.dart';
 import 'providers/chat_provider.dart';
+import 'providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); 
@@ -26,6 +27,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ExpenseProvider()),
         ChangeNotifierProvider(create: (_) => ShoppingProvider()),
         ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const KolokApp(),
     ),
@@ -37,29 +39,77 @@ class KolokApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Kolok',
-      theme: ThemeData(
-        textTheme: GoogleFonts.poppinsTextTheme(
-          const TextTheme(
-            displayLarge: TextStyle(fontWeight: FontWeight.w800), 
-            bodyLarge: TextStyle(fontWeight: FontWeight.w400),    
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Kolok',
+          themeMode: themeProvider.themeMode,
+          theme: ThemeData(
+            brightness: Brightness.light,
+            scaffoldBackgroundColor: const Color(0xFFF8F9FA),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFFF8F9FA),
+              elevation: 0,
+              iconTheme: IconThemeData(color: Color(0xFF2E3192)),
+              titleTextStyle: TextStyle(
+                color: Color(0xFF2E3192),
+                fontWeight: FontWeight.w800,
+                fontSize: 24,
+                fontFamily: 'Gilroy',
+              ),
+            ),
+            textTheme: GoogleFonts.poppinsTextTheme(
+              const TextTheme(
+                displayLarge: TextStyle(fontWeight: FontWeight.w800, color: Colors.black), 
+                bodyLarge: TextStyle(fontWeight: FontWeight.w400, color: Colors.black87),    
+              ),
+            ),
+            primaryColor: const Color(0xFF2E3192),
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF2E3192),
+              secondary: Color(0xFFD81B60),
+              surface: Colors.white,
+            ),
           ),
-        ),
-        primaryColor: const Color(0xFF2E3192),
-      ),
-      home: Consumer<AuthProvider>(
-        builder: (context, authProvider, child) {
-          // Si l'utilisateur est authentifié, on l'envoie sur MainScreen
-          // Sinon sur WelcomeScreen
-          if (authProvider.isAuthenticated) {
-            return const MainScreen();
-          } else {
-            return const WelcomeScreen();
-          }
-        },
-      ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF121212),
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF121212),
+              elevation: 0,
+              iconTheme: IconThemeData(color: Colors.white),
+              titleTextStyle: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 24,
+                fontFamily: 'Gilroy',
+              ),
+            ),
+            textTheme: GoogleFonts.poppinsTextTheme(
+              const TextTheme(
+                displayLarge: TextStyle(fontWeight: FontWeight.w800, color: Colors.white), 
+                bodyLarge: TextStyle(fontWeight: FontWeight.w400, color: Colors.white70),    
+              ),
+            ).apply(bodyColor: Colors.white, displayColor: Colors.white),
+            primaryColor: const Color(0xFF4C51F7),
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFF4C51F7),
+              secondary: Color(0xFFE8437D),
+              surface: Color(0xFF1E1E1E),
+            ),
+          ),
+          home: Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              if (authProvider.isAuthenticated) {
+                return const MainScreen();
+              } else {
+                return const WelcomeScreen();
+              }
+            },
+          ),
+        );
+      },
     );
   }
 }
