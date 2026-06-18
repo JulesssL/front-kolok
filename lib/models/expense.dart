@@ -38,14 +38,16 @@ class ExpenseSplit {
   final String id;
   final User? user;
   final double amount;
+  final bool isSettled;
 
-  ExpenseSplit({required this.id, this.user, required this.amount});
+  ExpenseSplit({required this.id, this.user, required this.amount, this.isSettled = false});
 
   factory ExpenseSplit.fromJson(Map<String, dynamic> json) {
     return ExpenseSplit(
       id: json['id'],
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       amount: double.tryParse(json['amount'].toString()) ?? 0.0,
+      isSettled: json['is_settled'] ?? false,
     );
   }
 }

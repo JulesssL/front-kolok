@@ -34,4 +34,25 @@ class ExpenseProvider with ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> settleMyDebts(String currentUserId) async {
+    try {
+      for (final expense in _expenses) {
+        if (expense.payer?.id != currentUserId) {
+          if (expense.splits != null) {
+            for (final split in expense.splits!) {
+              if (split.user?.id == currentUserId && !split.isSettled) {
+                await _expenseService.settleSplit(split.id);
+              }
+            }
+          }
+        }
+      }
+      // Re-fetch to get updated splits
+      await fetchExpenses();
+    } catch (e) {
+      debugPrint(e.toString());
+      rethrow;
+    }
+  }
 }

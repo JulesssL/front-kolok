@@ -30,4 +30,11 @@ class ExpenseService {
       throw Exception('Erreur lors de la création de la dépense');
     }
   }
+
+  Future<void> settleSplit(String splitId) async {
+    final response = await apiClient.patch('/expenses/splits/$splitId/settle');
+    if (response.statusCode != 200) {
+      throw Exception('Erreur lors du règlement de la dette');
+    }
+  }
 }
