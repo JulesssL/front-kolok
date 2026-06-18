@@ -113,7 +113,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   return const Center(child: Text("Aucun message"));
                 }
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   itemCount: chatProv.messages.length,
                   itemBuilder: (context, index) {
                     final msg = chatProv.messages[index];
@@ -132,7 +132,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
           ),
           Container(
             color: Theme.of(context).scaffoldBackgroundColor,
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 Expanded(
@@ -240,6 +240,9 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     child: Text(senderName, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                   ),
                 Container(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.of(context).size.width * 0.75,
+                  ),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: isMe ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.surface,
@@ -270,7 +273,6 @@ class _MessagesScreenState extends State<MessagesScreen> {
               ],
             ),
           ),
-          if (isMe) const SizedBox(width: 22), 
         ],
       ),
     );

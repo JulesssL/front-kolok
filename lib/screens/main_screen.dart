@@ -48,19 +48,24 @@ class _MainScreenState extends State<MainScreen> {
       resizeToAvoidBottomInset: true,
       body: _pages[_currentIndex],
 
-      floatingActionButton: (isKeyboardVisible || _currentIndex == 2) ? null : SizedBox(
-        height: 65,
-        width: 65,
-        child: FloatingActionButton(
-          onPressed: () => setState(() => _currentIndex = 2),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          elevation: 4,
-          shape: const CircleBorder(),
-          child: const Icon(
-            Icons.chat_bubble_outline,
-            color: Colors.white,
-            size: 28,
-          ), 
+      floatingActionButton: isKeyboardVisible ? null : AnimatedSlide(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        offset: _currentIndex == 2 ? const Offset(0, 0.6) : Offset.zero,
+        child: SizedBox(
+          height: 65,
+          width: 65,
+          child: FloatingActionButton(
+            onPressed: () => setState(() => _currentIndex = 2),
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            elevation: 4,
+            shape: const CircleBorder(),
+            child: const Icon(
+              Icons.chat_bubble_outline,
+              color: Colors.white,
+              size: 28,
+            ), 
+          ),
         ),
       ),
       floatingActionButtonLocation: isKeyboardVisible ? null : FloatingActionButtonLocation.centerDocked,
