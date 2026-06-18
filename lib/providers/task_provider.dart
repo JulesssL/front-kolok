@@ -24,9 +24,9 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  Future<void> createTask(String title, String? description, String? dueDate) async {
+  Future<void> createTask(String title, String? description, String? dueDate, String? assignedToId) async {
     try {
-      final newTask = await _taskService.createTask(title, description, dueDate);
+      final newTask = await _taskService.createTask(title, description, dueDate, assignedToId);
       _tasks.add(newTask);
       notifyListeners();
     } catch (e) {
@@ -52,6 +52,17 @@ class TaskProvider with ChangeNotifier {
         );
         notifyListeners();
       }
+    } catch (e) {
+      debugPrint(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> deleteTask(String taskId) async {
+    try {
+      await _taskService.deleteTask(taskId);
+      _tasks.removeWhere((t) => t.id == taskId);
+      notifyListeners();
     } catch (e) {
       debugPrint(e.toString());
       rethrow;

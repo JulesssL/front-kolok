@@ -13,13 +13,14 @@ class TaskService {
     }
   }
 
-  Future<Task> createTask(String title, String? description, String? dueDate) async {
+  Future<Task> createTask(String title, String? description, String? dueDate, String? assignedToId) async {
     final response = await apiClient.post(
       '/tasks',
       body: {
         'title': title,
         if (description != null) 'description': description,
         if (dueDate != null) 'due_date': dueDate,
+        if (assignedToId != null) 'assignedToId': assignedToId,
       },
     );
 
@@ -38,6 +39,13 @@ class TaskService {
 
     if (response.statusCode != 200) {
       throw Exception('Erreur lors de la mise à jour de la tâche');
+    }
+  }
+
+  Future<void> deleteTask(String taskId) async {
+    final response = await apiClient.delete('/tasks/$taskId');
+    if (response.statusCode != 200) {
+      throw Exception('Erreur lors de la suppression de la tâche');
     }
   }
 }
