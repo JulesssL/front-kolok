@@ -312,12 +312,16 @@ class _TasksScreenState extends State<TasksScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: const Icon(Icons.delete, color: Colors.white, size: 30),
       ),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          context.read<TaskProvider>().updateTaskStatus(task.id, 'done');
+          return false;
+        }
+        return true;
+      },
       onDismissed: (direction) {
         if (direction == DismissDirection.endToStart) {
           context.read<TaskProvider>().deleteTask(task.id);
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Tâche supprimée")));
-        } else if (direction == DismissDirection.startToEnd) {
-          context.read<TaskProvider>().updateTaskStatus(task.id, 'done');
         }
       },
       child: Container(
