@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import '../../providers/task_provider.dart';
 class TasksScreen extends StatefulWidget {
   const TasksScreen({super.key});
 
@@ -9,6 +10,16 @@ class TasksScreen extends StatefulWidget {
 
 class _TasksScreenState extends State<TasksScreen> {
   int _selectedTabIndex = 0; // 0: Mon tour, 1: Planning
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (mounted) {
+        context.read<TaskProvider>().fetchTasks();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -132,15 +143,26 @@ class _TasksScreenState extends State<TasksScreen> {
   }
 
   Widget _buildMyTurnView() {
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      children: [
-        _buildTaskCard(Icons.delete_outline, "Sortir les poubelles", "Sacs gris et jaune"),
-        _buildTaskCard(Icons.bathtub_outlined, "Nettoyer la salle de bain", "Douche, lavabos, WC"),
-        _buildTaskCard(Icons.cleaning_services_outlined, "Passer l'aspirateur", "Salon et couloir"),
-        _buildTaskCard(Icons.local_dining_outlined, "Faire la vaisselle", "Vaisselle du dîner"),
-        const SizedBox(height: 100), // padding for FAB
-      ],
+    return Consumer<TaskProvider>(
+      builder: (context, taskProv, child) {
+        if (taskProv.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (taskProv.tasks.isEmpty) {
+          return const Center(child: Text("Aucune tâche"));
+        }
+        return ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          children: [
+            ...taskProv.tasks.map((t) => _buildTaskCard(
+              Icons.cleaning_services_outlined, 
+              t.title, 
+              t.description ?? "Aucune description",
+            )),
+            const SizedBox(height: 100), // padding for FAB
+          ],
+        );
+      },
     );
   }
 

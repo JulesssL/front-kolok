@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import '../../providers/shopping_provider.dart';
 class ShoppingScreen extends StatefulWidget {
   const ShoppingScreen({super.key});
 
@@ -8,15 +9,23 @@ class ShoppingScreen extends StatefulWidget {
 }
 
 class _ShoppingScreenState extends State<ShoppingScreen> {
-  // Mock data for UI demonstration
-  final List<Map<String, dynamic>> _items = [
-    {"name": "Fromage rapé", "initial": "S", "checked": false},
-    {"name": "12 oeufs", "initial": "L", "checked": true},
-    {"name": "Crème fraîche", "initial": "T", "checked": false},
-    {"name": "6 packs d'eau", "initial": "M", "checked": true},
-    {"name": "Céréales", "initial": "S", "checked": false},
-    {"name": "Fromage grecque", "initial": "S", "checked": true},
-  ];
+  final TextEditingController _itemController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (mounted) {
+        context.read<ShoppingProvider>().fetchItems();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _itemController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,28 +68,40 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                   "Liste collaborative",
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                Text(
-                  "${_items.length} articles",
-                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold),
+                Consumer<ShoppingProvider>(
+                  builder: (context, prov, child) => Text(
+                    "${prov.items.length} articles",
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              itemCount: _items.length,
-              itemBuilder: (context, index) {
-                final item = _items[index];
-                return _buildShoppingItem(
-                  item["name"],
-                  item["initial"],
-                  item["checked"],
-                  (value) {
-                    setState(() {
-                      item["checked"] = value;
-                    });
+            child: Consumer<ShoppingProvider>(
+              builder: (context, shoppingProv, child) {
+                if (shoppingProv.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (shoppingProv.items.isEmpty) {
+                  return const Center(child: Text("La liste est vide"));
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  itemCount: shoppingProv.items.length,
+                  itemBuilder: (context, index) {
+                    final item = shoppingProv.items[index];
+                    return _buildShoppingItem(
+                      item.name,
+                      "?", // We'd need addedBy user info to show initial
+                      item.isBought,
+                      (value) {
+                        if (value != null) {
+                          shoppingProv.toggleItemStatus(item.id, value);
+                        }
+                      },
+                    );
                   },
                 );
               },
@@ -124,6 +145,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
         ],
       ),
       child: TextField(
+        controller: _itemController,
         decoration: InputDecoration(
           hintText: "Ajouter un article...",
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
@@ -135,7 +157,12 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
               backgroundColor: const Color(0xFF2E3192),
               child: IconButton(
                 icon: const Icon(Icons.add, color: Colors.white, size: 20),
-                onPressed: () {},
+                onPressed: () {
+                  if (_itemController.text.isNotEmpty) {
+                    context.read<ShoppingProvider>().createItem(_itemController.text, null);
+                    _itemController.clear();
+                  }
+                },
               ),
             ),
           ),

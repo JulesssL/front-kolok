@@ -6,8 +6,26 @@ import '../../providers/shopping_provider.dart';
 import '../../providers/chat_provider.dart';
 import '../settings/settings_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (mounted) {
+        context.read<TaskProvider>().fetchTasks();
+        context.read<ExpenseProvider>().fetchExpenses();
+        context.read<ShoppingProvider>().fetchItems();
+        context.read<ChatProvider>().fetchMessages();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

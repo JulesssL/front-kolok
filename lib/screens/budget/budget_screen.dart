@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/expense_provider.dart';
 
-class BudgetScreen extends StatelessWidget {
+class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
+
+  @override
+  State<BudgetScreen> createState() => _BudgetScreenState();
+}
+
+class _BudgetScreenState extends State<BudgetScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      if (mounted) {
+        context.read<ExpenseProvider>().fetchExpenses();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,12 +61,17 @@ class BudgetScreen extends StatelessWidget {
             _buildBalanceBar("On me doit", 20, 100, const Color(0xFF4CE0B3)),
             const SizedBox(height: 40),
             Center(
-              child: Column(
-                children: [
-                  Text("BALANCE NETTE", style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  const Text("-35€", style: TextStyle(color: Color(0xFF2E3192), fontSize: 32, fontWeight: FontWeight.w800)),
-                ],
+              child: Consumer<ExpenseProvider>(
+                builder: (context, expenseProv, child) {
+                  final totalExpenses = expenseProv.expenses.fold(0.0, (sum, e) => sum + e.amount);
+                  return Column(
+                    children: [
+                      Text("TOTAL DES DÉPENSES", style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      Text("${totalExpenses.toStringAsFixed(0)}€", style: const TextStyle(color: Color(0xFF2E3192), fontSize: 32, fontWeight: FontWeight.w800)),
+                    ],
+                  );
+                },
               ),
             ),
             const SizedBox(height: 40),
@@ -58,8 +80,26 @@ class BudgetScreen extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            _buildDetailItem("S", "Samy", "Électricité", "-45€", const Color(0xFFD81B60), const Color(0xFF2E3192)),
-            _buildDetailItem("M", "Marie", "Pizzas du vendredi", "-12€", const Color(0xFFD81B60), const Color(0xFF2E3192)),
+            Consumer<ExpenseProvider>(
+              builder: (context, expenseProv, child) {
+                if (expenseProv.isLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (expenseProv.expenses.isEmpty) {
+                  return const Text("Aucune dépense enregistrée.");
+                }
+                return Column(
+                  children: expenseProv.expenses.map((e) => _buildDetailItem(
+                    e.title[0].toUpperCase(), 
+                    e.title, 
+                    e.category ?? 'Dépense', 
+                    "${e.amount.toStringAsFixed(0)}€", 
+                    const Color(0xFFD81B60), 
+                    const Color(0xFF2E3192)
+                  )).toList(),
+                );
+              },
+            ),
             const SizedBox(height: 100),
           ],
         ),
