@@ -41,14 +41,9 @@ class _TasksScreenState extends State<TasksScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
-        title: Text(
-          "KOLOK",
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
-            fontWeight: FontWeight.w800,
-            fontSize: 24,
-            fontFamily: 'Gilroy',
-          ),
+        title: Image.asset(
+          'assets/images/logo_text_blue.png',
+          width: 90,
         ),
         actions: [
           IconButton(

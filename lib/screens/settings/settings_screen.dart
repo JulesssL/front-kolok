@@ -19,14 +19,9 @@ class SettingsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF2E3192)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          "KOLOK",
-          style: TextStyle(
-            color: Color(0xFF2E3192),
-            fontWeight: FontWeight.w800,
-            fontSize: 24,
-            fontFamily: 'Gilroy',
-          ),
+        title: Image.asset(
+          'assets/images/logo_text_blue.png',
+          width: 90,
         ),
         actions: [
           Padding(
