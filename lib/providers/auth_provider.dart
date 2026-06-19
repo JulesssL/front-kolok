@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/kolok_service.dart';
 import '../models/user.dart';
 
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+  final KolokService _kolokService = KolokService();
   
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -80,5 +82,20 @@ class AuthProvider with ChangeNotifier {
       _currentUser = null;
     }
     notifyListeners();
+  }
+
+  Future<void> updateKolokInfo(String kolokId, String name, String address) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _kolokService.updateKolok(kolokId, name: name, address: address);
+      _currentUser = await _authService.getMe();
+    } catch (e) {
+      debugPrint(e.toString());
+      rethrow;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

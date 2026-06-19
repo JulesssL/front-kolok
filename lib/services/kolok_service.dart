@@ -35,4 +35,21 @@ class KolokService {
       throw Exception(errorData['message'] ?? 'Erreur lors de la tentative de rejoindre');
     }
   }
+
+  Future<Map<String, dynamic>> updateKolok(String id, {String? name, String? address}) async {
+    final response = await apiClient.patch(
+      '/koloks/$id',
+      body: {
+        if (name != null) 'name': name,
+        if (address != null) 'address': address,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      final errorData = jsonDecode(response.body);
+      throw Exception(errorData['message'] ?? 'Erreur lors de la mise à jour de la colocation');
+    }
+  }
 }
