@@ -18,9 +18,11 @@ class ChatMessage {
       id: json['id'],
       content: json['content'],
       sender: json['sender'] != null ? User.fromJson(json['sender']) : null,
-      createdAt: json['created_at'] != null 
-          ? DateTime.parse(json['created_at']) 
-          : DateTime.now(),
+      createdAt: json['createdAt'] != null 
+          ? DateTime.parse(json['createdAt']) 
+          : (json['created_at'] != null 
+              ? DateTime.parse(json['created_at']) 
+              : DateTime.now()),
     );
   }
 }

@@ -61,6 +61,22 @@ class AuthService {
     return await storage.read(key: 'jwt_token');
   }
 
+  Future<void> refreshToken() async {
+    final token = await storage.read(key: 'jwt_token');
+    if (token == null) return;
+    
+    final url = Uri.parse('$baseUrl/auth/refresh');
+    final response = await http.get(url, headers: {'Authorization': 'Bearer $token'});
+    
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final newToken = data['access_token'];
+      if (newToken != null) {
+        await storage.write(key: 'jwt_token', value: newToken);
+      }
+    }
+  }
+
   Future<User> getMe() async {
     final token = await storage.read(key: 'jwt_token');
     final url = Uri.parse('$baseUrl/users/me');

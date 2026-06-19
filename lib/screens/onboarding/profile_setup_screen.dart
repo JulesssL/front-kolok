@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../widgets/main_button_onboarding.dart';
 import '../../providers/auth_provider.dart';
 import 'home_choice_screen.dart'; 
@@ -18,7 +20,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _formKey = GlobalKey<FormState>();
   final _prenomController = TextEditingController();
   final _nomController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
   
+  File? _avatarFile;
   bool _isLoading = false;
   bool _isFormValid = false;
 
@@ -43,6 +47,19 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+      maxWidth: 1080,
+    );
+    if (image != null) {
+      setState(() {
+        _avatarFile = File(image.path);
+      });
+    }
+  }
+
   Future<void> _registerUser() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -63,6 +80,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         widget.email,
         widget.password,
       );
+
+      if (_avatarFile != null) {
+        await context.read<AuthProvider>().uploadAvatar(_avatarFile!.path);
+      }
 
       if (mounted) {
         Navigator.pushReplacement(
@@ -110,24 +131,30 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   const SizedBox(height: 40),
 
                   Center(
-                    child: Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        CircleAvatar(
-                          radius: 60,
-                          backgroundColor: Colors.grey.shade200,
-                          child: Icon(Icons.camera_alt_outlined, size: 40, color: Colors.grey.shade400),
-                        ),
-                        Container(
-                          height: 35, width: 35,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2E3192),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3),
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          CircleAvatar(
+                            radius: 60,
+                            backgroundColor: Colors.grey.shade200,
+                            backgroundImage: _avatarFile != null ? FileImage(_avatarFile!) : null,
+                            child: _avatarFile == null 
+                                ? Icon(Icons.camera_alt_outlined, size: 40, color: Colors.grey.shade400)
+                                : null,
                           ),
-                          child: const Icon(Icons.camera_alt, color: Colors.white, size: 15),
-                        ),
-                      ],
+                          Container(
+                            height: 35, width: 35,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2E3192),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white, width: 3),
+                            ),
+                            child: const Icon(Icons.camera_alt, color: Colors.white, size: 15),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 

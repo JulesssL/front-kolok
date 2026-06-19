@@ -7,8 +7,8 @@ import '../core/network/api_client.dart';
 class ChatService {
   IO.Socket? _socket;
 
-  Future<List<ChatMessage>> getMessages() async {
-    final response = await apiClient.get('/chat');
+  Future<List<ChatMessage>> getMessages({int limit = 20, int offset = 0}) async {
+    final response = await apiClient.get('/chat?limit=$limit&offset=$offset');
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
       return data.map((json) => ChatMessage.fromJson(json)).toList();

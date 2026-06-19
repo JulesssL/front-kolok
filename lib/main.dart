@@ -4,6 +4,7 @@ import 'screens/onboarding/welcome_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/main_screen.dart';
 import 'screens/kolok/kolok_setup_screen.dart';
+import 'screens/splash/splash_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'providers/auth_provider.dart';
 import 'providers/kolok_provider.dart';
@@ -100,20 +101,37 @@ class KolokApp extends StatelessWidget {
               surface: Color(0xFF1E1E1E),
             ),
           ),
-          home: Consumer<AuthProvider>(
-            builder: (context, authProvider, child) {
-              if (authProvider.isAuthenticated) {
-                if (authProvider.currentUser?.kolok == null) {
-                  return const KolokSetupScreen();
-                }
-                return const MainScreen();
-              } else {
-                return const WelcomeScreen();
-              }
-            },
-          ),
+          home: const SplashScreen(),
         );
       },
     );
   }
 }
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, child) {
+        if (authProvider.isCheckingAuth) {
+          return const Scaffold(
+            backgroundColor: Color(0xFF2E3192),
+            body: Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            ),
+          );
+        }
+        if (authProvider.isAuthenticated) {
+          if (authProvider.currentUser?.kolok == null) {
+            return const KolokSetupScreen();
+          }
+          return const MainScreen();
+        } else {
+          return const WelcomeScreen();
+        }
+      },
+    );
+  }
+}

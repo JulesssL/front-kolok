@@ -52,7 +52,11 @@ class SettingsScreen extends StatelessWidget {
                     GestureDetector(
                       onTap: () async {
                         final picker = ImagePicker();
-                        final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+                        final XFile? image = await picker.pickImage(
+                          source: ImageSource.gallery,
+                          imageQuality: 50,
+                          maxWidth: 1080,
+                        );
                         if (image != null && context.mounted) {
                           await authProv.uploadAvatar(image.path);
                         }

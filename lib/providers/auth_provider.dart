@@ -10,6 +10,9 @@ class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  bool _isCheckingAuth = true;
+  bool get isCheckingAuth => _isCheckingAuth;
+
   bool _isAuthenticated = false;
   bool get isAuthenticated => _isAuthenticated;
 
@@ -71,6 +74,7 @@ class AuthProvider with ChangeNotifier {
     final token = await _authService.getToken();
     if (token != null) {
       try {
+        await _authService.refreshToken();
         _currentUser = await _authService.getMe();
         _isAuthenticated = true;
       } catch (e) {
@@ -81,6 +85,7 @@ class AuthProvider with ChangeNotifier {
       _isAuthenticated = false;
       _currentUser = null;
     }
+    _isCheckingAuth = false;
     notifyListeners();
   }
 

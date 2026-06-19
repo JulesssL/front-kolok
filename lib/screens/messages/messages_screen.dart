@@ -16,10 +16,16 @@ class MessagesScreen extends StatefulWidget {
 
 class _MessagesScreenState extends State<MessagesScreen> {
   final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
+        context.read<ChatProvider>().loadMoreMessages();
+      }
+    });
     Future.microtask(() {
       if (mounted) {
         context.read<ChatProvider>().fetchMessages();
@@ -30,6 +36,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
   @override
   void dispose() {
     _messageController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -113,10 +120,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
                   return const Center(child: Text("Aucun message"));
                 }
                 return ListView.builder(
+                  controller: _scrollController,
+                  reverse: true,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   itemCount: chatProv.messages.length,
                   itemBuilder: (context, index) {
-                    final msg = chatProv.messages[index];
+                    final msg = chatProv.messages[chatProv.messages.length - 1 - index];
                     final isMe = msg.sender?.id == authProv.currentUser?.id;
                     
                     return _buildMessageBubble(
