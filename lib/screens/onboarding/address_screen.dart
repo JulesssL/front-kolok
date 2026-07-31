@@ -20,6 +20,25 @@ class _AddressScreenState extends State<AddressScreen> {
 
   final KolokService _kolokService = KolokService();
   bool _isLoading = false;
+  bool _isFormValid = false;
+
+  void _validateForm() {
+    setState(() {
+      _isFormValid = _nameController.text.trim().isNotEmpty &&
+                     _addressController.text.trim().isNotEmpty &&
+                     _zipController.text.trim().isNotEmpty &&
+                     _cityController.text.trim().isNotEmpty;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.addListener(_validateForm);
+    _addressController.addListener(_validateForm);
+    _zipController.addListener(_validateForm);
+    _cityController.addListener(_validateForm);
+  }
 
   @override
   void dispose() {
@@ -101,11 +120,10 @@ class _AddressScreenState extends State<AddressScreen> {
                   const SizedBox(height: 50),
 
                   _isLoading
-                      ? const Center(child: CircularProgressIndicator(color: Color(0xFF918EF4)))
+                      ? const Center(child: CircularProgressIndicator())
                       : MainButton(
                           text: "CRÉER LE FOYER",
-                          color: const Color(0xFF918EF4),
-                          onPressed: _submitForm, 
+                          onPressed: _isFormValid ? _submitForm : null, 
                         ),
                 ],
               ),
@@ -132,7 +150,7 @@ class _AddressScreenState extends State<AddressScreen> {
           },
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
             border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade300)),
             enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey.shade300)),
           ),

@@ -15,6 +15,19 @@ class _JoinKolokScreenState extends State<JoinKolokScreen> {
   final _codeController = TextEditingController();
   final KolokService _kolokService = KolokService();
   bool _isLoading = false;
+  bool _isFormValid = false;
+
+  void _validateForm() {
+    setState(() {
+      _isFormValid = _codeController.text.trim().isNotEmpty;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _codeController.addListener(_validateForm);
+  }
 
   @override
   void dispose() {
@@ -28,7 +41,11 @@ class _JoinKolokScreenState extends State<JoinKolokScreen> {
     setState(() => _isLoading = true);
 
     try {
-      await _kolokService.joinKolok(_codeController.text.trim());
+      String code = _codeController.text.trim();
+      if (code.startsWith('K-')) {
+        code = code.substring(2);
+      }
+      await _kolokService.joinKolok('K-$code');
 
       if (mounted) {
         Navigator.pushAndRemoveUntil(
@@ -74,7 +91,10 @@ class _JoinKolokScreenState extends State<JoinKolokScreen> {
                     controller: _codeController,
                     validator: (value) => value!.isEmpty ? 'Ce champ est requis' : null,
                     decoration: InputDecoration(
-                      hintText: "Ex: AB12CD",
+                      hintText: "AB12CD",
+                      hintStyle: TextStyle(color: Colors.grey.shade400),
+                      prefixText: "K-",
+                      prefixStyle: const TextStyle(color: Colors.black, fontSize: 16),
                       filled: true,
                       fillColor: Colors.grey.shade50,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
@@ -85,11 +105,10 @@ class _JoinKolokScreenState extends State<JoinKolokScreen> {
                   const Spacer(),
 
                   _isLoading
-                      ? const Center(child: CircularProgressIndicator(color: Color(0xFF918EF4)))
+                      ? const Center(child: CircularProgressIndicator())
                       : MainButton(
                           text: "REJOINDRE",
-                          color: const Color(0xFF918EF4),
-                          onPressed: _submitForm, 
+                          onPressed: _isFormValid ? _submitForm : null, 
                         ),
                 ],
               ),

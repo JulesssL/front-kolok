@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../widgets/main_button_onboarding.dart';
 import '../main_screen.dart';
@@ -18,6 +19,7 @@ class _LogInScreenState extends State<LogInScreen> {
   final _passwordController = TextEditingController();
 
   bool _isFormValid = false;
+  bool _obscurePassword = true;
 
   void _validateForm() {
     setState(() {
@@ -88,7 +90,15 @@ class _LogInScreenState extends State<LogInScreen> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(hintText: "votre@email.com"),
+                    inputFormatters: [
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        return newValue.copyWith(text: newValue.text.toLowerCase());
+                      }),
+                    ],
+                    decoration: InputDecoration(
+                      hintText: "votre@email.com",
+                      hintStyle: TextStyle(color: Colors.grey.shade400),
+                    ),
                     validator: (value) {
                       if (value == null || value.isEmpty || !value.contains('@')) {
                         return 'Veuillez entrer un email valide';
@@ -102,8 +112,22 @@ class _LogInScreenState extends State<LogInScreen> {
                   const Text("Mot de passe", style: TextStyle(fontWeight: FontWeight.bold)),
                   TextFormField(
                     controller: _passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(hintText: "••••••••"),
+                    obscureText: _obscurePassword,
+                    decoration: InputDecoration(
+                      hintText: "••••••••",
+                      hintStyle: TextStyle(color: Colors.grey.shade400),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                    ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Veuillez entrer votre mot de passe';

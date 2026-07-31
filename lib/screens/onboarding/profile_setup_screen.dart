@@ -167,10 +167,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                   const SizedBox(height: 50),
 
                   _isLoading
-                      ? const Center(child: CircularProgressIndicator(color: Color(0xFF918EF4)))
+                      ? const Center(child: CircularProgressIndicator())
                       : MainButton(
                           text: "SUIVANT",
-                          color: const Color(0xFF918EF4),
                           onPressed: _isFormValid ? _registerUser : null, 
                         ),
                   const SizedBox(height: 20),
@@ -194,6 +193,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           validator: (value) => value!.isEmpty ? 'Ce champ est requis' : null,
           decoration: InputDecoration(
             hintText: hint,
+            hintStyle: TextStyle(color: Colors.grey.shade400),
             filled: true,
             fillColor: Colors.grey.shade50,
             contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
