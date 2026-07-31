@@ -9,6 +9,7 @@ import '../../providers/auth_provider.dart';
 import '../settings/settings_screen.dart';
 import '../../widgets/task_details_modal.dart';
 import '../../models/task.dart';
+import '../../models/kolok_activity.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -82,6 +83,49 @@ class _HomeScreenState extends State<HomeScreen> {
           // Simple balance logic for now
           final totalExpenses = expenseProv.expenses.fold(0.0, (sum, e) => sum + e.amount);
 
+          // Aggregation for Kolok Activity
+          final List<KolokActivity> activities = [];
+          
+          for (var t in taskProv.tasks) {
+            if (t.status == 'done' && t.updatedAt != null) {
+              activities.add(KolokActivity(
+                id: 't_${t.id}',
+                type: ActivityType.taskDone,
+                description: '${t.assignedTo?.name ?? 'Quelqu\'un'} a terminé la tâche "${t.title}"',
+                date: t.updatedAt!,
+                userInitial: t.assignedTo?.name?[0].toUpperCase(),
+                userAvatarUrl: t.assignedTo?.avatarUrl,
+              ));
+            }
+          }
+
+          for (var e in expenseProv.expenses) {
+            activities.add(KolokActivity(
+              id: 'e_${e.id}',
+              type: ActivityType.expenseAdded,
+              description: '${e.payer?.name ?? 'Quelqu\'un'} a ajouté une dépense de ${e.amount.toStringAsFixed(0)}€ ("${e.title}")',
+              date: e.date,
+              userInitial: e.payer?.name?[0].toUpperCase(),
+              userAvatarUrl: e.payer?.avatarUrl,
+            ));
+          }
+
+          for (var item in shoppingProv.items) {
+            if (item.createdAt != null) {
+              activities.add(KolokActivity(
+                id: 's_${item.id}',
+                type: ActivityType.shoppingAdded,
+                description: '${item.createdBy?.name ?? 'Quelqu\'un'} a ajouté "${item.name}" aux courses',
+                date: item.createdAt!,
+                userInitial: item.createdBy?.name?[0].toUpperCase(),
+                userAvatarUrl: item.createdBy?.avatarUrl,
+              ));
+            }
+          }
+
+          activities.sort((a, b) => b.date.compareTo(a.date));
+          final latestActivities = activities.take(3).toList();
+
           return RefreshIndicator(
             onRefresh: () async {
               await Future.wait([
@@ -106,6 +150,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Text("Aucune tâche pour le moment")
                 else
                   ...tasks.take(3).map((t) => _buildTaskItem(t)),
+                const SizedBox(height: 24),
+                const Text(
+                  "Vie de la kolok",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                if (latestActivities.isEmpty)
+                  const Text("Aucune activité récente")
+                else
+                  ...latestActivities.map((act) => _buildActivityItem(act)),
                 const SizedBox(height: 24),
                 const Text(
                   "Fil d'actualité",
@@ -270,6 +324,42 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildActivityItem(KolokActivity act) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12.0),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: act.color.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(act.icon, color: act.color, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  act.description,
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  DateFormat('dd/MM HH:mm').format(act.date),
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

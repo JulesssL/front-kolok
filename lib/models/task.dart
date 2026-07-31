@@ -9,6 +9,8 @@ class Task {
   final DateTime? dueDate;
   final User? assignedTo;
   final Kolok? kolok;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   Task({
     required this.id,
@@ -18,6 +20,8 @@ class Task {
     this.dueDate,
     this.assignedTo,
     this.kolok,
+    this.createdAt,
+    this.updatedAt,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -29,6 +33,8 @@ class Task {
       dueDate: json['due_date'] != null ? DateTime.parse(json['due_date']) : null,
       assignedTo: json['assignedTo'] != null ? User.fromJson(json['assignedTo']) : null,
       kolok: json['kolok'] != null ? Kolok.fromJson(json['kolok']) : null,
+      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : (json['created_at'] != null ? DateTime.parse(json['created_at']) : null),
+      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt']) : (json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null),
     );
   }
 
