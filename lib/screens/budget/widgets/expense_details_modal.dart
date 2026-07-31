@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../../models/expense.dart';
+import '../../../../providers/auth_provider.dart';
+import '../../../../services/payment_service.dart';
+import '../../../../constants/bank_constants.dart';
 
 class ExpenseDetailsModal extends StatelessWidget {
   final Expense expense;
@@ -83,6 +87,59 @@ class ExpenseDetailsModal extends StatelessWidget {
               );
             }),
           const SizedBox(height: 32),
+          // Logique de remboursement
+          Consumer<AuthProvider>(
+            builder: (context, authProv, child) {
+              final currentUser = authProv.currentUser;
+              if (currentUser == null || expense.payer == null || expense.splits == null) {
+                return const SizedBox.shrink();
+              }
+
+              // Chercher si l'utilisateur courant doit rembourser
+              final mySplit = expense.splits!.where((s) => 
+                s.user?.id == currentUser.id && 
+                !s.isSettled && 
+                s.user?.id != expense.payer?.id
+              ).toList();
+
+              if (mySplit.isNotEmpty) {
+                final receiver = expense.payer!;
+                final bankId = receiver.preferredBank;
+                final iban = receiver.iban;
+                final bankName = bankId != null ? BankConstants.supportedBanks[bankId]?.displayName : null;
+
+                return Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (iban != null && iban.isNotEmpty) {
+                            await PaymentService.processPayment(context, bankId ?? '', iban);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Le receveur n\'a pas renseigné son IBAN.')),
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFD81B60),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                        ),
+                        child: Text(
+                          bankName != null ? "Rembourser via $bankName" : "Rembourser manuellement",
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -101,3 +158,4 @@ class ExpenseDetailsModal extends StatelessWidget {
     );
   }
 }
+

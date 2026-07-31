@@ -5,6 +5,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
 import 'kolok_settings_screen.dart';
+import 'bank_settings_screen.dart';
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -165,6 +167,46 @@ class SettingsScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     const Expanded(
                       child: Text("Ma Kolok", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    ),
+                    Icon(Icons.chevron_right, color: Colors.grey.shade400),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const BankSettingsScreen()),
+                );
+              },
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.05),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    )
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.account_balance, color: Theme.of(context).colorScheme.primary, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text("Informations Bancaires", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                     Icon(Icons.chevron_right, color: Colors.grey.shade400),
                   ],

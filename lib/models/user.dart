@@ -5,9 +5,19 @@ class User {
   final String name;
   final String email;
   final String? avatarUrl;
+  final String? iban;
+  final String? preferredBank;
   final Kolok? kolok;
 
-  User({required this.id, required this.name, required this.email, this.avatarUrl, this.kolok});
+  User({
+    required this.id, 
+    required this.name, 
+    required this.email, 
+    this.avatarUrl,
+    this.iban,
+    this.preferredBank, 
+    this.kolok
+  });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -15,6 +25,8 @@ class User {
       name: json['name'],
       email: json['email'],
       avatarUrl: json['avatarUrl'] ?? json['avatar_url'],
+      iban: json['iban'],
+      preferredBank: json['preferredBank'] ?? json['preferred_bank'],
       kolok: json['kolok'] != null ? Kolok.fromJson(json['kolok']) : null,
     );
   }
@@ -25,6 +37,8 @@ class User {
       'name': name,
       'email': email,
       'avatarUrl': avatarUrl,
+      'iban': iban,
+      'preferredBank': preferredBank,
       if (kolok != null) 'kolok': kolok!.toJson(),
     };
   }

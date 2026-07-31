@@ -98,6 +98,30 @@ class AuthService {
     }
   }
 
+  Future<User> updateProfile({String? iban, String? preferredBank}) async {
+    final token = await storage.read(key: 'jwt_token');
+    final url = Uri.parse('$baseUrl/users/me');
+    
+    final Map<String, dynamic> body = {};
+    if (iban != null) body['iban'] = iban;
+    if (preferredBank != null) body['preferred_bank'] = preferredBank;
+
+    final response = await http.patch(
+      url, 
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 200) {
+      return User.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Erreur lors de la mise à jour du profil');
+    }
+  }
+
   Future<void> logout() async {
     await storage.delete(key: 'jwt_token');
   }

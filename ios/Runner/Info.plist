@@ -66,5 +66,14 @@
       <string>UIInterfaceOrientationLandscapeLeft</string>
       <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>boursorama</string>
+      <string>revolut</string>
+      <string>lydia</string>
+      <string>societegenerale</string>
+      <string>ca-mobile</string>
+      <string>cic</string>
+    </array>
   </dict>
 </plist>

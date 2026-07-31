@@ -26,5 +26,12 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Banques P2P -->
+        <package android:name="com.boursorama.android.clients" />
+        <package android:name="com.revolut.revolut" />
+        <package android:name="com.lydia" />
+        <package android:name="mobi.societegenerale.mobile.lappli" />
+        <package android:name="fr.creditagricole.androidapp" />
+        <package android:name="com.cic_prod.bad" />
     </queries>
 </manifest>
