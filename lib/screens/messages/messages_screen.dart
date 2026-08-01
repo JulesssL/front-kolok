@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../models/user.dart';
 import '../../models/chat_message.dart';
 import '../../models/poll.dart';
@@ -9,6 +10,7 @@ import '../../providers/chat_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../settings/settings_screen.dart';
 import 'widgets/create_poll_modal.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class MessagesScreen extends StatefulWidget {
   const MessagesScreen({super.key});
@@ -141,17 +143,21 @@ class _MessagesScreenState extends State<MessagesScreen> {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.poll, color: Color(0xFF2E3192)),
-                  onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) => const CreatePollModal(),
-                    );
-                  },
+                CircleAvatar(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  child: IconButton(
+                    icon: SvgPicture.asset('assets/icons/vote.svg', colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn), width: 18),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (context) => const CreatePollModal(),
+                      );
+                    },
+                  ),
                 ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -258,7 +264,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
                     child: Text(senderName, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                   ),
                 if (isPoll)
-                  _buildPollWidget(msg.poll!, currentUserId)
+                  _buildPollWidget(msg.poll!, currentUserId, isMe)
                 else
                   Container(
                     constraints: BoxConstraints(
@@ -299,7 +305,7 @@ class _MessagesScreenState extends State<MessagesScreen> {
     );
   }
 
-  Widget _buildPollWidget(Poll poll, String? currentUserId) {
+  Widget _buildPollWidget(Poll poll, String? currentUserId, bool isMe) {
     final bool hasVoted = currentUserId != null && poll.hasVoted(currentUserId);
     final bool isExpired = poll.isExpired;
 
@@ -309,8 +315,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
       ),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20).copyWith(bottomLeft: const Radius.circular(0)),
+        color: const Color(0xFFFCA311),
+        borderRadius: BorderRadius.circular(20).copyWith(
+          bottomLeft: isMe ? const Radius.circular(20) : const Radius.circular(0),
+          bottomRight: isMe ? const Radius.circular(0) : const Radius.circular(20),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.05),
@@ -324,12 +333,16 @@ class _MessagesScreenState extends State<MessagesScreen> {
         children: [
           Row(
             children: [
-              const Icon(Icons.poll, color: Color(0xFF2E3192), size: 16),
+              SvgPicture.asset(
+                'assets/icons/vote.svg',
+                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                width: 16,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   poll.question,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.white),
                 ),
               ),
             ],
@@ -340,45 +353,52 @@ class _MessagesScreenState extends State<MessagesScreen> {
             final int votesCount = poll.getVotesForOption(option.id);
             
             // Trouver l'option gagnante si expiré
-            bool isWinning = false;
-            if (isExpired && poll.totalVotes > 0) {
-              int maxVotes = 0;
-              for (var o in poll.options) {
-                final v = poll.getVotesForOption(o.id);
-                if (v > maxVotes) maxVotes = v;
-              }
-              isWinning = votesCount == maxVotes && votesCount > 0;
-            }
-
-            return GestureDetector(
-              onTap: () {
-                if (!isExpired && currentUserId != null) {
-                  context.read<ChatProvider>().votePoll(poll.id, option.id);
+              bool isWinning = false;
+              if (isExpired && poll.totalVotes > 0) {
+                int maxVotes = 0;
+                for (var o in poll.options) {
+                  final v = poll.getVotesForOption(o.id);
+                  if (v > maxVotes) maxVotes = v;
                 }
-              },
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 8),
-                height: 40,
-                decoration: BoxDecoration(
-                  color: isWinning 
-                      ? const Color(0xFF2E3192).withOpacity(0.1) 
-                      : (hasVoted || isExpired ? const Color(0xFFF8F9FA) : Colors.white),
-                  border: Border.all(
-                    color: isWinning 
+                isWinning = votesCount == maxVotes && votesCount > 0;
+              }
+
+              bool isChosen = false;
+              if (currentUserId != null) {
+                isChosen = poll.votes.any((v) => v.user?.id == currentUserId && v.optionId == option.id);
+              }
+
+              return GestureDetector(
+                onTap: () {
+                  if (!isExpired && currentUserId != null) {
+                    context.read<ChatProvider>().votePoll(poll.id, option.id);
+                  }
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: isChosen 
                         ? const Color(0xFF2E3192) 
-                        : (hasVoted || isExpired ? Colors.transparent : Colors.grey.shade300),
+                        : const Color(0xFF2E3192).withOpacity(0.15),
+                    border: Border.all(
+                      color: isChosen 
+                          ? const Color(0xFF2E3192) 
+                          : Colors.transparent,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  borderRadius: BorderRadius.circular(8),
-                ),
                 child: Stack(
+                  alignment: Alignment.centerLeft,
                   children: [
                     if (hasVoted || isExpired)
                       FractionallySizedBox(
+                        heightFactor: 1.0,
                         alignment: Alignment.centerLeft,
                         widthFactor: percentage,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: isWinning ? const Color(0xFF2E3192).withOpacity(0.2) : const Color(0xFF2E3192).withOpacity(0.1),
+                            color: const Color(0xFF2E3192).withOpacity(isChosen ? 1.0 : 0.3),
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
@@ -392,15 +412,16 @@ class _MessagesScreenState extends State<MessagesScreen> {
                             child: Text(
                               option.text, 
                               style: TextStyle(
-                                fontWeight: isWinning ? FontWeight.bold : FontWeight.normal, 
+                                fontWeight: isWinning || isChosen ? FontWeight.bold : FontWeight.normal, 
                                 fontSize: 13,
+                                color: (isChosen || !hasVoted && !isExpired) ? Colors.white : Colors.white, // always white on blue
                               ),
                             ),
                           ),
                           if (hasVoted || isExpired)
                             Text(
                               "${(percentage * 100).toStringAsFixed(0)}%", 
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.white),
                             ),
                         ],
                       ),
@@ -414,12 +435,12 @@ class _MessagesScreenState extends State<MessagesScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("${poll.totalVotes} votant(s)", style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
+              Text("${poll.totalVotes} votant(s)", style: const TextStyle(fontSize: 10, color: Colors.white70)),
               if (isExpired)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(4)),
-                  child: const Text("Terminé", style: TextStyle(fontSize: 10, color: Colors.red, fontWeight: FontWeight.bold)),
+                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                  child: const Text("Terminé", style: TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
             ],
           ),

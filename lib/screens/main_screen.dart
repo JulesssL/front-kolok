@@ -60,11 +60,14 @@ class _MainScreenState extends State<MainScreen> {
             backgroundColor: Theme.of(context).colorScheme.primary,
             elevation: 4,
             shape: const CircleBorder(),
-            child: const Icon(
-              Icons.chat_bubble_outline,
-              color: Colors.white,
-              size: 28,
-            ), 
+            child: SvgPicture.asset(
+              'assets/icons/messages.svg',
+              colorFilter: ColorFilter.mode(
+                Colors.white,
+                BlendMode.srcIn,
+              ),
+              width: 22,
+            ),
           ),
         ),
       ),
@@ -103,22 +106,15 @@ class _MainScreenState extends State<MainScreen> {
         onTap: () => setState(() => _currentIndex = index),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (iconName == "budget")
-              Icon(
-                Icons.account_balance_wallet,
-                color: isActive ? primaryColor : Colors.grey.shade400,
-                size: 24,
-              )
-            else
-              SvgPicture.asset(
-                assetPath,
-                width: 22,
-                colorFilter: ColorFilter.mode(
-                  isActive ? primaryColor : Colors.grey.shade400,
-                  BlendMode.srcIn,
-                ),
+          children: [            
+            SvgPicture.asset(
+              assetPath,
+              width: 22,
+              colorFilter: ColorFilter.mode(
+                isActive ? primaryColor : Colors.grey.shade400,
+                BlendMode.srcIn,
               ),
+            ),
             const SizedBox(height: 4),
             Text(
               label,

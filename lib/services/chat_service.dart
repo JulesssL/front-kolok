@@ -6,6 +6,7 @@ import '../core/network/api_client.dart';
 
 class ChatService {
   IO.Socket? _socket;
+  String? _currentToken;
 
   Future<List<ChatMessage>> getMessages({int limit = 20, int offset = 0}) async {
     final response = await apiClient.get('/chat?limit=$limit&offset=$offset');
@@ -18,11 +19,20 @@ class ChatService {
   }
 
   void connect(String token, Function(ChatMessage) onMessageReceived, Function(ChatMessage) onPollUpdated) {
-    if (_socket != null && _socket!.connected) return;
+    if (_socket != null && _socket!.connected) {
+      if (_currentToken == token) {
+        return;
+      } else {
+        disconnect();
+      }
+    }
+    
+    _currentToken = token;
 
     final baseUrl = apiClient.baseUrl;
     _socket = IO.io(baseUrl, IO.OptionBuilder()
       .disableAutoConnect()
+      .enableForceNew()
       .setTransports(['websocket'])
       .setAuth({'token': 'Bearer $token'})
       .build()
@@ -54,6 +64,7 @@ class ChatService {
   void disconnect() {
     _socket?.disconnect();
     _socket = null;
+    _currentToken = null;
   }
 
   void sendMessage(String content, {String type = 'text', List<String>? pollOptions}) {

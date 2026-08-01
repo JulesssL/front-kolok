@@ -81,9 +81,23 @@ class _CreatePollModalState extends State<CreatePollModal> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Créer un sondage",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Créer un sondage",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.history, color: Color(0xFF2E3192)),
+                  onPressed: () {
+                    // TODO: Implémenter l'écran historique des sondages
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Historique des sondages à venir !")),
+                    );
+                  },
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             TextField(
