@@ -14,6 +14,7 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
   final TextEditingController _amountController = TextEditingController();
   final List<String> _categories = ["courses", "loyer", "factures", "loisirs", "autres"];
   String? _selectedCategory;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -101,9 +102,10 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () async {
+                  onPressed: _isLoading ? null : () async {
                     final amount = double.tryParse(_amountController.text.replaceAll(',', '.'));
                     if (_titleController.text.isNotEmpty && amount != null && amount > 0) {
+                      setState(() => _isLoading = true);
                       try {
                         await context.read<ExpenseProvider>().createExpense(
                           _titleController.text, 
@@ -116,6 +118,8 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
                         }
+                      } finally {
+                        if (mounted) setState(() => _isLoading = false);
                       }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez entrer un titre et un montant valide.')));
@@ -123,10 +127,17 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2E3192),
+                    disabledBackgroundColor: Colors.grey.shade400,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   ),
-                  child: const Text("AJOUTER", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: _isLoading 
+                    ? const SizedBox(
+                        height: 20, 
+                        width: 20, 
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                      )
+                    : const Text("AJOUTER", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
