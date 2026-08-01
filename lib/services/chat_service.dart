@@ -74,7 +74,7 @@ class ChatService {
   Future<void> votePoll(String pollId, String optionId) async {
     final response = await apiClient.post(
       '/chat/polls/$pollId/vote',
-      body: jsonEncode({'optionId': optionId}),
+      body: {'optionId': optionId},
     );
     
     if (response.statusCode != 200 && response.statusCode != 201) {
