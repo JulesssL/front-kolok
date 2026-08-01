@@ -17,7 +17,7 @@ class ChatService {
     }
   }
 
-  void connect(String token, Function(ChatMessage) onMessageReceived) {
+  void connect(String token, Function(ChatMessage) onMessageReceived, Function(ChatMessage) onPollUpdated) {
     if (_socket != null && _socket!.connected) return;
 
     final baseUrl = apiClient.baseUrl;
@@ -40,6 +40,12 @@ class ChatService {
       }
     });
 
+    _socket?.on('pollUpdated', (data) {
+      if (data != null) {
+        onPollUpdated(ChatMessage.fromJson(data));
+      }
+    });
+
     _socket?.onDisconnect((_) {
       debugPrint('Disconnected from Chat WebSocket');
     });
@@ -50,11 +56,29 @@ class ChatService {
     _socket = null;
   }
 
-  void sendMessage(String content) {
+  void sendMessage(String content, {String type = 'text', List<String>? pollOptions}) {
     if (_socket != null && _socket!.connected) {
-      _socket?.emit('sendMessage', {'content': content});
+      final data = <String, dynamic>{
+        'content': content,
+        'type': type,
+      };
+      if (type == 'poll' && pollOptions != null) {
+        data['pollOptions'] = pollOptions;
+      }
+      _socket?.emit('sendMessage', data);
     } else {
       throw Exception('Erreur: non connecté au serveur de chat');
+    }
+  }
+
+  Future<void> votePoll(String pollId, String optionId) async {
+    final response = await apiClient.post(
+      '/chat/polls/$pollId/vote',
+      body: jsonEncode({'optionId': optionId}),
+    );
+    
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('Erreur lors du vote');
     }
   }
 }

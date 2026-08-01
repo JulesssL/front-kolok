@@ -1,4 +1,5 @@
 import 'user.dart';
+import 'poll.dart';
 
 class ChatMessage {
   final String id;
@@ -6,11 +7,16 @@ class ChatMessage {
   final User? sender;
   final DateTime createdAt;
 
+  final String type;
+  final Poll? poll;
+
   ChatMessage({
     required this.id,
     required this.content,
     this.sender,
     required this.createdAt,
+    this.type = 'text',
+    this.poll,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
@@ -23,6 +29,8 @@ class ChatMessage {
           : (json['created_at'] != null 
               ? DateTime.parse(json['created_at']) 
               : DateTime.now()),
+      type: json['type'] ?? 'text',
+      poll: json['poll'] != null ? Poll.fromJson(json['poll']) : null,
     );
   }
 }

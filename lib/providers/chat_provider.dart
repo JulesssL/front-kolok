@@ -30,7 +30,7 @@ class ChatProvider with ChangeNotifier {
       
       final token = await apiClient.storage.read(key: 'jwt_token');
       if (token != null) {
-        _chatService.connect(token, _onMessageReceived);
+        _chatService.connect(token, _onMessageReceived, _onPollUpdated);
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -74,9 +74,26 @@ class ChatProvider with ChangeNotifier {
     }
   }
 
-  void sendMessage(String content) {
+  void _onPollUpdated(ChatMessage updatedMessage) {
+    final index = _messages.indexWhere((m) => m.id == updatedMessage.id);
+    if (index != -1) {
+      _messages[index] = updatedMessage;
+      notifyListeners();
+    }
+  }
+
+  void sendMessage(String content, {String type = 'text', List<String>? pollOptions}) {
     try {
-      _chatService.sendMessage(content);
+      _chatService.sendMessage(content, type: type, pollOptions: pollOptions);
+    } catch (e) {
+      debugPrint(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> votePoll(String pollId, String optionId) async {
+    try {
+      await _chatService.votePoll(pollId, optionId);
     } catch (e) {
       debugPrint(e.toString());
       rethrow;
